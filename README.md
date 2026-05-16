@@ -1,134 +1,96 @@
-# ⚡ NEXUS — Premium Elektronika Do'koni
+# NEXUS Marketplace
 
+**O'zbekiston bozori uchun Django asosida qurilgan to'liq e-commerce tizimi.**
 
-
-<p align="center">
-  <b>O'zbekiston bozori uchun qurilgan zamonaviy e-commerce platforma</b><br/>
-  ASUS/ROG uslubidagi glassmorphism dizayn · AJAX real-time interfeys · Docker tayyor
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/Python-3.12-blue?style=flat-square&logo=python" />
-  <img src="https://img.shields.io/badge/Django-6.0-green?style=flat-square&logo=django" />
-  <img src="https://img.shields.io/badge/PostgreSQL-16-blue?style=flat-square&logo=postgresql" />
-  <img src="https://img.shields.io/badge/Docker-ready-2496ED?style=flat-square&logo=docker" />
-  <img src="https://img.shields.io/badge/Muallif-Shohruh-blueviolet?style=flat-square" />
-</p>
+Muallif: **Shohruh** · [github.com/Shakh07/Marketplace](https://github.com/Shakh07/Marketplace)
 
 ---
 
-## ✨ Imkoniyatlar
+## Loyiha haqida
 
-| # | Imkoniyat | Tavsif |
-|---|---|---|
-| 🛍 | **Premium Storefront** | ASUS/ROG glassmorphism dizayn, micro-animatsiyalar, mega-menu |
-| 🔍 | **Real-time Qidiruv** | AJAX asosida — sahifa yangilanmasdan ishlaydi |
-| 🗂 | **Kategoriya Filtri** | Noutbuklar, Monitorlar, Aksessuarlar, Gaming bo'limlari |
-| 🛒 | **AJAX Savat** | Savatga qo'shish, miqdor o'zgartirish — real-time badge |
-| 📦 | **Buyurtma Tizimi** | Checkout, holat kuzatuvi, chek chiqarish |
-| 🖥 | **Manager Panel** | Glassmorphism admin — mahsulot, ombor, buyurtma, foydalanuvchilar |
-| 🖼 | **Image Cropper** | Drag & Drop rasm + Cropper.js bilan standart formatga solish |
-| 🐳 | **Docker** | PostgreSQL + Gunicorn + WhiteNoise — bitta buyruq bilan ishga tushadi |
-| 📊 | **Dashboard Analytics** | Daromad, foyda, xarajat va sotuvlar statistikasi |
+NEXUS — mahsulotlarni ko'rish, savatga solish va buyurtma berishgacha bo'lgan to'liq jarayonni qamrab oluvchi onlayn do'kon. Ikkita tomoni bor: xaridorlar uchun ochiq storefront va operatorlar uchun yopiq manager panel.
+
+Vaqt zonasi — `Asia/Tashkent`. Ma'lumotlar bazasi: PostgreSQL. Interfeys tili: O'zbek + Ingliz.
 
 ---
 
-## 🛠 Texnologiyalar
+## Texnologiyalar
 
-### Backend
-- **Python 3.12** · **Django 6.0** · **Django REST Framework 3.17**
-- **PostgreSQL 16** (production) · SQLite (development)
-- **Gunicorn** — production WSGI server
-- **WhiteNoise** — statik fayllar
+**Backend:** Python 3.12, Django 6.0.3, Django REST Framework 3.17.1  
+**Ma'lumotlar bazasi:** PostgreSQL 16 (production), SQLite (local)  
+**Frontend:** Django Templates, Vanilla CSS, Vanilla JS, Fetch API  
+**Dizayn:** Glassmorphism — `backdrop-filter: blur`, shaffof kartalar  
+**Shriftlar:** Inter + Outfit (Google Fonts)  
+**Infra:** Docker, Docker Compose, Gunicorn, WhiteNoise  
 
-### Frontend
-- **Django Templates** · **Vanilla CSS** · **Vanilla JavaScript**
-- **Glassmorphism** dizayn (`backdrop-filter: blur`)
-- **Google Fonts** — Inter + Outfit
-- **AJAX (Fetch API)** — partial template pattern
-
-### DevOps
-- **Docker** + **Docker Compose**
-- **django-unfold** — zamonaviy admin UI
-- **Pillow** — rasm qayta ishlash
-- **Cropper.js** — frontend rasm qirqish
+Barcha kutubxonalar `requirements.txt` da to'liq ko'rsatilgan.
 
 ---
 
-## 🚀 Ishga Tushirish
+## Ishga tushirish
 
-### 🐳 Docker bilan (tavsiya etiladi)
+### Docker (tavsiya etiladi)
 
 ```bash
 git clone https://github.com/Shakh07/Marketplace.git
 cd Marketplace
-docker-compose up -d --build
+docker-compose up --build -d
 ```
 
-Dastur avtomatik ravishda `http://localhost:8000` da ishga tushadi.
+Ochiladi: `http://localhost:8000`
 
-### 💻 Lokal (development)
+### Lokal muhitda
 
 ```bash
 python -m venv venv
-venv\Scripts\activate          # Windows
+venv\Scripts\activate
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py runserver
 ```
 
-### 🗄 Test ma'lumotlarini yuklash
-
-```bash
-python manage.py seed_data
-```
+> **Eslatma:** `.env` faylida `DATABASE_URL` yoki alohida `DB_NAME`, `DB_USER`, `DB_PASSWORD` o'zgaruvchilarini belgilash kerak. Aks holda loyiha `nexus_db` nomli lokal PostgreSQL bazasiga ulanishga harakat qiladi.
 
 ---
 
-## 🌐 Asosiy Sahifalar
-
-| URL | Tavsif |
-|---|---|
-| `/` | Bosh sahifa (hero banner, kategoriyalar, featured mahsulotlar) |
-| `/products/` | Mahsulotlar katalogi |
-| `/products/?category=laptops` | Kategoriya bo'yicha filtrlash |
-| `/cart/` | Xarid savati |
-| `/checkout/` | Buyurtma rasmiylashtirish |
-| `/orders/` | Buyurtmalar tarixi |
-| `/manager/` | Manager boshqaruv paneli |
-| `/admin/` | Django Unfold admin |
-
----
-
-## 📁 Tuzilishi
+## Tuzilishi
 
 ```
 Marketplace/
 ├── apps/
-│   ├── accounts/      # Foydalanuvchilar va autentifikatsiya
-│   ├── catalog/       # Mahsulotlar, kategoriyalar, brendlar
-│   ├── orders/        # Savat, checkout, buyurtmalar
-│   ├── manager/       # Admin boshqaruv paneli
-│   ├── warehouse/     # Ombor va zaxira
-│   ├── reviews/       # Sharhlar tizimi
-│   ├── returns/       # Qaytarishlar
-│   └── suppliers/     # Yetkazib beruvchilar
-├── templates/         # HTML shablonlar
-├── static/            # CSS, JS, ikonkalar
-├── ecommerce/         # Django loyiha sozlamalari
+│   ├── accounts/    # Foydalanuvchi tizimi
+│   ├── catalog/     # Mahsulotlar, kategoriyalar, brendlar
+│   ├── orders/      # Savat va buyurtmalar
+│   ├── manager/     # Operator paneli
+│   ├── warehouse/   # Ombor zaxirasi
+│   ├── reviews/     # Sharhlar
+│   ├── returns/     # Qaytarishlar
+│   └── suppliers/   # Ta'minotchilar
+├── templates/       # Barcha HTML shablonlar
+├── static/          # CSS va JS fayllar
+├── ecommerce/       # Django sozlamalari (settings, urls, wsgi)
 ├── Dockerfile
 ├── docker-compose.yml
-├── entrypoint.sh
 └── requirements.txt
 ```
 
 ---
 
-## 👨‍💻 Muallif
+## Asosiy sahifalar
 
-**Shohruh** — Loyihani ishlab chiquvchi  
-🔗 GitHub: [@Shakh07](https://github.com/Shakh07)
+| URL | Nima ko'rinadi |
+|---|---|
+| `/` | Bosh sahifa |
+| `/products/` | Barcha mahsulotlar |
+| `/products/<slug>/` | Mahsulot kartasi |
+| `/cart/` | Savat |
+| `/checkout/` | Buyurtma berish |
+| `/orders/` | Buyurtmalar tarixi |
+| `/manager/` | Operator paneli |
+| `/admin/` | Django admin (Unfold) |
 
 ---
 
-<p align="center"><i>NEXUS — kelajak bu yerda.</i></p>
+## Muallif
+
+**Shohruh** · [@Shakh07](https://github.com/Shakh07)
