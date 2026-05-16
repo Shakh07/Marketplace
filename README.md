@@ -46,8 +46,8 @@
 ### Docker bilan (tavsiya etiladi)
 
 ```bash
-git clone https://github.com/Kirito514/nexus-ecommerce.git
-cd nexus-ecommerce
+git clone https://github.com/Shakh07/Marketplace.git
+cd Marketplace
 docker-compose up -d --build
 ```
 
@@ -110,7 +110,7 @@ nexus-ecommerce/
 
 ## 👨‍💻 Muallif
 
-**Kirito514** — Asosiy ishlab chiquvchi
+**Shohruh** — Asosiy ishlab chiquvchi
 
 ---
 
