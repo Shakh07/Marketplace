@@ -1,5 +1,9 @@
 # ⚡ NEXUS — E-Commerce Platformasi: To'liq Texnik Hujjat
 
+> **Muallif:** Shohruh  
+> **GitHub:** [github.com/Shakh07/Marketplace](https://github.com/Shakh07/Marketplace)  
+> **Sana:** 2026-yil, May
+
 ---
 
 ## 1. Loyiha Nima?
@@ -203,7 +207,7 @@ O'zining modeli yo'q — boshqa app'lar modellaridan foydalanadi. `views.py` loy
 ## 6. Fayl Tuzilishi
 
 ```
-nexus-ecommerce/
+Marketplace/
 ├── 📁 apps/
 │   ├── accounts/          # Foydalanuvchilar, auth, profil, manzillar
 │   ├── catalog/           # Mahsulotlar, kategoriyalar, brendlar, wishlist
@@ -313,8 +317,8 @@ erDiagram
 
 ### Docker bilan (production-style)
 ```bash
-git clone https://github.com/Kirito514/nexus-ecommerce.git
-cd nexus-ecommerce
+git clone https://github.com/Shakh07/Marketplace.git
+cd Marketplace
 docker-compose up --build -d
 # → http://localhost:8000
 ```
@@ -352,3 +356,14 @@ python manage.py runserver
 | **Ma'lumotlar bazasi** | PostgreSQL 16 |
 | **Konteynerizatsiya** | Docker + Docker Compose |
 | **Veb-server** | Gunicorn (production) |
+
+---
+
+## 👨‍💻 Muallif
+
+**Shohruh** — Asosiy ishlab chiquvchi  
+GitHub: [@Shakh07](https://github.com/Shakh07)
+
+---
+
+*NEXUS — kelajak bu yerda.*
