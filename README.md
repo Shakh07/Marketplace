@@ -1,8 +1,6 @@
 # ⚡ NEXUS — Premium Elektronika Do'koni
 
-<p align="center">
-  <img src="docs/assets/hero.png" alt="NEXUS Banner" width="100%"/>
-</p>
+
 
 <p align="center">
   <b>O'zbekiston bozori uchun qurilgan zamonaviy e-commerce platforma</b><br/>
