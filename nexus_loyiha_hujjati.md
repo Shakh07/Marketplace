@@ -1,174 +1,230 @@
-# ⚡ NEXUS — E-Commerce Platformasi: To'liq Texnik Hujjat
+# 📄 NEXUS Marketplace — Loyiha Texnik Hujjati
 
 > **Muallif:** Shohruh  
-> **GitHub:** [github.com/Shakh07/Marketplace](https://github.com/Shakh07/Marketplace)  
+> **GitHub:** [@Shakh07](https://github.com/Shakh07)  
+> **Loyiha:** [github.com/Shakh07/Marketplace](https://github.com/Shakh07/Marketplace)  
 > **Sana:** 2026-yil, May
 
 ---
 
-## 1. Loyiha Nima?
+## 1. Loyihaga Umumiy Nazar
 
-**NEXUS** — O'zbekiston bozori uchun mo'ljallangan to'liq funksional **premium elektronika do'koni platformasi**. U ikki asosiy qismdan iborat:
+**NEXUS** — O'zbekiston bozori uchun qurilgan to'liq funksional **premium elektronika do'koni** platformasi. Loyiha ikkita asosiy qismdan iborat:
 
-1. **Storefront (Xaridorlar tomoni)** — mahsulotlarni ko'rish, kategoriya bo'yicha filtrlash, savatga qo'shish, buyurtma berish va profil boshqarish.
-2. **Manager Panel (Admin tomoni)** — buyurtmalar, mahsulotlar, ombor zaxirasi, foydalanuvchilar va bosh sahifa kontentini boshqarish.
+- **Storefront** — xaridorlar uchun: mahsulotlarni ko'rish, filtrlash, savatga qo'shish, buyurtma berish.
+- **Manager Panel** — adminlar uchun: buyurtmalar, mahsulotlar, ombor, foydalanuvchilar, statistika.
 
-Dizayn **ASUS / ROG** uslubida qurilgan — glassmorphism, premium tipografiya, neon aksentlar va silliq micro-animatsiyalar.
+Dizayn **ASUS / ROG** uslubida — glassmorphism effektlari, neon ko'k aksentlar, premium tipografiya va silliq animatsiyalar.
 
 ---
 
-## 2. Texnologiyalar
+## 2. Texnologiyalar Steki
 
 ### 2.1 Dasturlash Tillari
 
-| Til | Ishlatilgan joy | Maqsad |
+| Til | Ishlatilgan joy | Vazifa |
 |---|---|---|
-| **Python 3.12** | Backend | Django bilan asosiy server logikasi |
-| **HTML5** | Templates | Sahifa strukturasi |
-| **CSS3** | Dizayn | Glassmorphism, animatsiyalar, ranglar |
-| **JavaScript ES6+** | Frontend | AJAX, real-time UI, savat, mega-menu |
-| **SQL** | Ma'lumotlar bazasi | Django ORM orqali PostgreSQL |
-| **Bash** | DevOps | `entrypoint.sh` — Docker ishga tushganda migrate + server |
+| Python 3.12 | Backend | Asosiy server logikasi (Django) |
+| HTML5 | Templates | Sahifa tuzilishi |
+| CSS3 | Dizayn | Glassmorphism, animatsiyalar, rang tizimi |
+| JavaScript ES6+ | Frontend | AJAX, real-time UI, savat, mega-menu |
+| SQL | Ma'lumotlar bazasi | Django ORM orqali PostgreSQL |
+| Bash | DevOps | `entrypoint.sh` — migrate + server |
 
-### 2.2 Framework va Kutubxonalar
+### 2.2 Asosiy Kutubxonalar
 
-| Kutubxona | Versiya | Maqsad |
+| Kutubxona | Versiya | Vazifa |
 |---|---|---|
-| **Django** | 6.0.3 | Backend framework: URL routing, ORM, templates, auth |
-| **Django REST Framework** | 3.17.1 | REST API — JSON endpointlar |
-| **django-cors-headers** | 4.9.0 | Cross-origin so'rovlarga ruxsat |
-| **django-unfold** | 0.87.0 | Django admin panelini zamonaviy UI bilan almashtirish |
-| **Pillow** | 12.2.0 | Rasm yuklash va qayta ishlash |
-| **Faker** | 40.12.0 | Test ma'lumotlari generatsiyasi |
-| **Gunicorn** | ≥21.2.0 | Production WSGI serveri |
-| **psycopg2-binary** | ≥2.9.9 | PostgreSQL ulanish drayveri |
-| **dj-database-url** | ≥2.1.0 | `DATABASE_URL` dan baza sozlamalarini o'qish |
-| **WhiteNoise** | ≥6.7.0 | Statik fayllarni production da xizmat ko'rsatish |
-| **pandas / numpy** | 3.0.2 / 2.4.4 | Dashboard statistika va hisobotlar |
+| Django | 6.0.3 | Backend framework |
+| Django REST Framework | 3.17.1 | REST API endpointlar |
+| django-cors-headers | 4.9.0 | Cross-origin so'rovlar |
+| django-unfold | 0.87.0 | Zamonaviy Django admin UI |
+| Pillow | 12.2.0 | Rasm yuklash va qayta ishlash |
+| Faker | 40.12.0 | Test ma'lumotlari |
+| Gunicorn | ≥21.2.0 | Production WSGI server |
+| psycopg2-binary | ≥2.9.9 | PostgreSQL drayveri |
+| dj-database-url | ≥2.1.0 | Database URL konfiguratsiyasi |
+| WhiteNoise | ≥6.7.0 | Statik fayllar (production) |
+| pandas / numpy | 3.0.2 / 2.4.4 | Dashboard statistika |
 
 ### 2.3 Infratuzilma
 
-| Texnologiya | Maqsad |
+| Texnologiya | Vazifa |
 |---|---|
-| **Docker** | Loyihani izolyatsiyalangan muhitda ishlatish |
-| **Docker Compose** | `web` + `db` konteynerlarini birgalikda boshqarish |
-| **PostgreSQL 16** | Production ma'lumotlar bazasi |
-| **Git** | Versiya nazorati |
+| Docker | Izolyatsiyalangan muhit |
+| Docker Compose | `web` + `db` konteynerlar boshqaruvi |
+| PostgreSQL 16 | Production ma'lumotlar bazasi |
+| Git + GitHub | Versiya nazorati |
 
 ---
 
 ## 3. Arxitektura
 
-Loyiha **Django MTV (Model-Template-View)** arxitekturasiga asoslangan:
-
-```mermaid
-graph LR
-    A[Brauzer] -->|HTTP Request| B[Django URLs Router]
-    B --> C[View — Biznes Logika]
-    C --> D[Model — PostgreSQL]
-    C --> E[Template — HTML]
-    E --> A
-    C -->|AJAX| F[JSON Response]
-    F --> A
-```
-
-### AJAX Pattern (Real-time yangilanish)
+Loyiha **Django MTV (Model–Template–View)** arxitekturasida qurilgan.
 
 ```
-Foydalanuvchi yozadi
-  → 400ms debounce
-  → fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-  → Django: AJAX? → faqat <tbody> HTML qaytaradi
-  → JavaScript: element.innerHTML = data.html
-  → URL: history.pushState() — sahifa YANGILANMAYDI
+Foydalanuvchi (Brauzer)
+        |
+        | HTTP so'rov
+        ↓
+   Django URL Router
+        |
+        ↓
+   View (Biznes logika)
+    /           \
+Model           Template
+(PostgreSQL)    (HTML)
+                  |
+                  ↓ (oddiy so'rov)
+             Brauzerga HTML
+
+View → JSON (AJAX so'rov) → Brauzer JS → DOM yangilanadi
+```
+
+### AJAX Ishlash Tartibi
+
+```
+1. Foydalanuvchi qidiradi yoki filtr tanlaydi
+2. 400ms debounce kutiladi (ortiqcha so'rovlar oldini olish)
+3. fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+4. Django AJAX ekanini aniqlaydi → faqat qisman HTML qaytaradi
+5. JavaScript: container.innerHTML = html
+6. history.pushState() — URL yangilanadi, sahifa YANGILANMAYDI
 ```
 
 ---
 
-## 4. Django Ilovalar (Apps)
+## 4. Django Ilovalar (Apps) — Batafsil
 
-Loyiha **8 ta Django app** dan tashkil topgan:
+### 4.1 `apps/accounts` — Foydalanuvchilar Tizimi
 
-### 4.1 `apps/accounts` — Foydalanuvchilar
+**Modeller:**
 
 | Model | Tavsif |
 |---|---|
-| `CustomUser` | `AbstractUser` kengaytmasi. `user_type`, `account_status`, `loyalty_points` |
-| `Address` | Yetkazish manzillari (shahar, ko'cha, pochta indeksi) |
-| `SiteSettings` | Singleton — sayt nomi, kontakt, ijtimoiy tarmoqlar |
-| `PasswordResetToken` | Parol tiklash tokeni |
-| `UserSession` | Sessiyalarni kuzatish (IP, qurilma, vaqt) |
+| `CustomUser` | `AbstractUser` asosida. `user_type` (customer/manager), `account_status`, `loyalty_points` |
+| `Address` | Yetkazish manzili: shahar, ko'cha, pochta indeksi |
+| `SiteSettings` | Singleton — sayt nomi, telefon, ijtimoiy tarmoq linklari |
+| `PasswordResetToken` | Parol tiklash uchun vaqtinchalik token |
+| `NewsletterSubscriber` | Email obunachilari |
+
+**Asosiy xususiyatlar:**
+- Custom foydalanuvchi modeli (email orqali kirish)
+- Manager va Customer rollari
+- Profil sahifasi (buyurtmalar tarixi, manzillar)
+
+---
 
 ### 4.2 `apps/catalog` — Mahsulotlar Katalogi
 
-| Model | Tavsif |
-|---|---|
-| `HeroSection` | Singleton — bosh sahifa hero banneri (admin boshqaradi) |
-| `Category` | Ierarxik kategoriyalar (parent/child). Slug bo'yicha filtrlanadi |
-| `Brand` | Brendlar (ASUS, ROG, va boshqalar) |
-| `Product` | Asosiy mahsulot: nom, narx, SKU, status, reyting |
-| `ProductVariant` | Variantlar (rang, hajm) — har birida alohida narx |
-| `ProductImage` | Mahsulot rasmlari (asosiy + qo'shimcha) |
-| `ProductAttribute` | Kategoriyaga xos atributlar (masalan: Ekran o'lchami) |
-| `Tag` / `ProductTag` | Teglar (#yangi, #aksiya) |
-| `Wishlist` | Sevimli mahsulotlar |
-
-### 4.3 `apps/orders` — Buyurtmalar
+**Modeller:**
 
 | Model | Tavsif |
 |---|---|
-| `Order` | Buyurtma: raqam, status, to'lov holati |
-| `OrderItem` | Buyurtmadagi har bir mahsulot |
-| `ShoppingCart` | Vaqtinchalik savat |
-| `PaymentTransaction` | To'lov tranzaksiyalari |
+| `HeroSection` | Singleton — bosh sahifa hero banneri |
+| `Category` | Ierarxik (parent → child). URL slug bo'yicha filtr |
+| `Brand` | ASUS, ROG, Lenovo va boshqa brendlar |
+| `Product` | Nom, narx, narx_cost, SKU, status, reyting, tavsif |
+| `ProductVariant` | Variantlar (xotira, rang) — har birida alohida narx |
+| `ProductImage` | Asosiy + qo'shimcha rasmlar |
+| `ProductAttribute` | Texnik xususiyatlar (RAM, ekran, protsessor) |
+| `Tag` / `ProductTag` | Teglar (#yangi, #aksiya, #top) |
+| `Wishlist` | Sevimli mahsulotlar ro'yxati |
 
-### 4.4 `apps/warehouse` — Ombor
+**Asosiy xususiyatlar:**
+- Kategoriya bo'yicha filtrlash (subcategory qo'llab-quvvatlaydi)
+- AJAX qidiruv — debounce bilan
+- Reyting va sharh tizimi bilan integratsiya
+- Hero banner — admin tomonidan boshqariladi
+
+---
+
+### 4.3 `apps/orders` — Buyurtmalar va Savat
+
+**Modeller:**
 
 | Model | Tavsif |
 |---|---|
-| `Warehouse` | Fizik omborlar |
-| `Inventory` | Mahsulot zaxirasi (ombor bo'yicha) |
-| `InventoryMovement` | Kirim/chiqim tarixi |
+| `Order` | Buyurtma: raqam, status, to'lov turi, manzil |
+| `OrderItem` | Buyurtmadagi har bir mahsulot va miqdori |
+| `ShoppingCart` | Sessiya asosidagi vaqtinchalik savat |
+| `PaymentTransaction` | To'lov tranzaksiya tarixi |
 
-### 4.5 `apps/reviews` — Sharhlar
+**Buyurtma statuslari:** `pending → confirmed → shipped → delivered` / `cancelled`
+
+**Asosiy xususiyatlar:**
+- AJAX savat (sahifa yangilanmasdan)
+- Checkout formasi (yetkazish manzili, to'lov turi)
+- Chek chiqarish (print-friendly sahifa)
+- Buyurtma holati kuzatuvi
+
+---
+
+### 4.4 `apps/warehouse` — Ombor Boshqaruvi
+
+| Model | Tavsif |
+|---|---|
+| `Warehouse` | Fizik ombor (nomi, manzili) |
+| `Inventory` | Mahsulot zaxirasi (ombor bo'yicha miqdor) |
+| `InventoryMovement` | Kirim/chiqim/transfer tarixi |
+
+---
+
+### 4.5 `apps/reviews` — Sharhlar Tizimi
 
 | Model | Tavsif |
 |---|---|
 | `Review` | 1–5 yulduz baho + matn sharh |
-| `ReviewImage` | Sharhga biriktilgan rasmlar |
-
-### 4.6 `apps/returns` — Qaytarishlar
-`Return`, `ReturnItem` — qaytarish so'rovlari va holati.
-
-### 4.7 `apps/suppliers` — Yetkazib Beruvchilar
-`Supplier`, `PurchaseOrder`, `PurchaseOrderItem`.
-
-### 4.8 `apps/manager` — Admin Panel
-O'zining modeli yo'q — boshqa app'lar modellaridan foydalanadi. `views.py` loyihadagi eng katta fayl.
+| `ReviewImage` | Sharhga biriktilgan rasmlar (maksimal 5 ta) |
 
 ---
 
-## 5. Sahifalar Ro'yxati
+### 4.6 `apps/returns` — Qaytarishlar
+`Return` va `ReturnItem` — mahsulot qaytarish so'rovlari, sababi va holati.
 
-### 5.1 Storefront (Xaridorlar)
+---
+
+### 4.7 `apps/suppliers` — Yetkazib Beruvchilar
+`Supplier`, `PurchaseOrder`, `PurchaseOrderItem` — xarid va ta'minot zanjiri.
+
+---
+
+### 4.8 `apps/manager` — Boshqaruv Paneli
+
+O'zining database modeli yo'q — barcha boshqa app'lar modellarini boshqaradi.
+
+**Sahifalar:**
+- Dashboard (statistika: daromad, foyda, buyurtmalar grafigi)
+- Buyurtmalar boshqaruvi (AJAX holat o'zgartirish)
+- Mahsulot CRUD (Image Cropper bilan)
+- Ombor zaxirasi ko'rish
+- Foydalanuvchilar ro'yxati va tafsiloti
+- Kategoriya va brendlar boshqaruvi
+- Storefront sozlamalari (hero banner, sayt nomi)
+
+---
+
+## 5. Sahifalar va URL'lar
+
+### 5.1 Storefront
 
 | # | Sahifa | URL | Template |
 |---|---|---|---|
 | 1 | Bosh sahifa | `/` | `home.html` |
 | 2 | Mahsulotlar katalogi | `/products/` | `catalog/product_list.html` |
-| 3 | Kategoriya filtri | `/products/?category=laptops` | `catalog/product_list.html` |
+| 3 | Kategoriya filtri | `/products/?category=<slug>` | `catalog/product_list.html` |
 | 4 | Mahsulot tafsiloti | `/products/<slug>/` | `catalog/product_detail.html` |
 | 5 | Savat | `/cart/` | `orders/cart.html` |
 | 6 | Checkout | `/checkout/` | `orders/checkout.html` |
 | 7 | Buyurtmalar tarixi | `/orders/` | `orders/order_list.html` |
 | 8 | Buyurtma tafsiloti | `/orders/<id>/` | `orders/order_detail.html` |
-| 9 | Chek chop etish | `/orders/<id>/receipt/` | `orders/receipt_print.html` |
+| 9 | Chek chiqarish | `/orders/<id>/receipt/` | `orders/receipt_print.html` |
 | 10 | Ro'yxatdan o'tish | `/auth/register/` | `accounts/register.html` |
-| 11 | Kirish | `/auth/login/` | `accounts/login.html` |
+| 11 | Tizimga kirish | `/auth/login/` | `accounts/login.html` |
 | 12 | Profil | `/profile/` | `accounts/profile.html` |
 | 13 | Yordam markazi | `/help/` | `catalog/help_page.html` |
 
-### 5.2 Manager Panel (Admin)
+### 5.2 Manager Panel
 
 | # | Sahifa | URL |
 |---|---|---|
@@ -191,16 +247,16 @@ O'zining modeli yo'q — boshqa app'lar modellaridan foydalanadi. `views.py` loy
 |---|---|---|
 | `/api/categories/` | GET | Kategoriyalar ro'yxati |
 | `/api/brands/` | GET | Brendlar ro'yxati |
-| `/api/products/` | GET | Mahsulotlar (`?category=`, `?brand=`, `?search=`) |
+| `/api/products/` | GET | Mahsulotlar (filtr: `?category=`, `?brand=`, `?search=`) |
 | `/api/products/<slug>/` | GET | Mahsulot tafsiloti |
-| `/api/wishlist/` | GET/POST | Sevimlilar |
+| `/api/wishlist/` | GET, POST | Sevimlilar |
 | `/api/auth/register/` | POST | Ro'yxatdan o'tish |
-| `/api/users/me/` | GET/PUT | Profil |
-| `/api/addresses/` | GET/POST | Manzillar |
+| `/api/users/me/` | GET, PUT | Foydalanuvchi profili |
+| `/api/addresses/` | GET, POST | Manzillar |
 | `/api/orders/` | GET | Buyurtmalar |
 | `/api/cart/` | GET | Savat |
 
-> **Jami:** 25 ta veb-sahifa + 10 ta API endpoint = **35 ta route**
+> **Jami:** 25 sahifa + 10 API endpoint = **35 ta route**
 
 ---
 
@@ -208,43 +264,41 @@ O'zining modeli yo'q — boshqa app'lar modellaridan foydalanadi. `views.py` loy
 
 ```
 Marketplace/
+│
 ├── 📁 apps/
-│   ├── accounts/          # Foydalanuvchilar, auth, profil, manzillar
-│   ├── catalog/           # Mahsulotlar, kategoriyalar, brendlar, wishlist
-│   ├── orders/            # Savat, checkout, buyurtmalar, to'lovlar
-│   ├── manager/           # ⭐ Admin panel (views.py, forms.py, urls.py)
-│   ├── warehouse/         # Ombor, zaxira, harakat tarixi
-│   ├── reviews/           # Sharhlar, reaksiyalar
+│   ├── accounts/          # Foydalanuvchilar, auth, profil
+│   ├── catalog/           # Mahsulotlar, kategoriyalar, brendlar
+│   ├── orders/            # Savat, checkout, buyurtmalar
+│   ├── manager/           # ⭐ Boshqaruv paneli
+│   ├── warehouse/         # Ombor va zaxira
+│   ├── reviews/           # Sharhlar
 │   ├── returns/           # Qaytarishlar
-│   └── suppliers/         # Yetkazib beruvchilar, xarid buyurtmalari
+│   └── suppliers/         # Yetkazib beruvchilar
 │
 ├── 📁 ecommerce/
-│   ├── settings.py        # Asosiy Django sozlamalari
-│   ├── urls.py            # Bosh URL router
-│   └── wsgi.py            # Production entry point
+│   ├── settings.py        # Django sozlamalari
+│   ├── urls.py            # Asosiy URL router
+│   ├── wsgi.py            # Production entry point
+│   └── dashboard.py       # django-unfold dashboard
 │
 ├── 📁 templates/
-│   ├── base.html          # Asosiy frontend shablon (navbar, footer, scripts)
-│   ├── home.html          # Bosh sahifa
-│   ├── accounts/          # Login, Register, Profile
-│   ├── catalog/           # Product list, Product detail, Help
-│   ├── orders/            # Cart, Checkout, Order list/detail, Receipt
-│   └── manager/           # ⭐ Admin sahifalari
-│       ├── base_manager.html      # Sidebar + topbar
-│       ├── dashboard.html
-│       ├── *_list.html            # Ro'yxat sahifalari
-│       ├── *_partial.html         # AJAX uchun qisman templatelar
-│       └── includes/image_cropper.html
+│   ├── base.html                    # Asosiy shablon (navbar, footer)
+│   ├── home.html                    # Bosh sahifa
+│   ├── accounts/                    # Login, Register, Profile
+│   ├── catalog/                     # Product list, detail, help
+│   ├── orders/                      # Cart, Checkout, Orders, Receipt
+│   └── manager/                     # ⭐ Admin sahifalari
+│       ├── base_manager.html        # Sidebar + topbar
+│       ├── dashboard.html           # Statistika
+│       ├── *_list.html              # Ro'yxat sahifalari
+│       ├── *_list_partial.html      # AJAX qisman templatelar
+│       └── includes/
+│           └── image_cropper.html   # Rasm yuklash komponenti
 │
 ├── 📁 static/
-│   ├── css/style.css      # Global stillar (glassmorphism, ASUS theme)
-│   └── js/                # JavaScript fayllar
+│   └── css/style.css      # Global stillar
 │
-├── 📁 media/
-│   ├── products/          # Mahsulot rasmlari
-│   ├── categories/        # Kategoriya rasmlari
-│   ├── hero/              # Hero banner rasmi
-│   └── brands/            # Brend logolari
+├── 📁 media/              # Yuklangan rasmlar (.gitignore da)
 │
 ├── Dockerfile
 ├── docker-compose.yml
@@ -255,114 +309,116 @@ Marketplace/
 
 ---
 
-## 7. Ma'lumotlar Bazasi Diagrammasi
+## 7. Ma'lumotlar Bazasi Sxemasi
 
-```mermaid
-erDiagram
-    CustomUser ||--o{ Address : "has"
-    CustomUser ||--o{ Order : "places"
-    CustomUser ||--o{ ShoppingCart : "has"
-    CustomUser ||--o{ Review : "writes"
-    CustomUser ||--o{ Wishlist : "saves"
+```
+CustomUser ──< Address
+           ──< Order ──< OrderItem >── Product
+           ──< ShoppingCart
+           ──< Review
+           ──< Wishlist
 
-    Category ||--o{ Product : "contains"
-    Category ||--o{ Category : "parent/child"
-    Brand ||--o{ Product : "makes"
-    Product ||--o{ ProductVariant : "has"
-    Product ||--o{ ProductImage : "has"
-    Product ||--o{ Inventory : "stored in"
+Category ──< Category (parent/child)
+         ──< Product ──< ProductVariant
+                     ──< ProductImage
+                     ──< Inventory >── Warehouse
+                                        ──< InventoryMovement
 
-    Order ||--o{ OrderItem : "contains"
-    Order ||--o{ PaymentTransaction : "paid via"
-    OrderItem }o--|| Product : "references"
+Order ──< PaymentTransaction
 
-    Warehouse ||--o{ Inventory : "stores"
-    Inventory ||--o{ InventoryMovement : "tracks"
-
-    Supplier ||--o{ PurchaseOrder : "receives"
-    PurchaseOrder ||--o{ PurchaseOrderItem : "contains"
+Supplier ──< PurchaseOrder ──< PurchaseOrderItem
 ```
 
-**Jami:** 25+ ta jadval.
+**Jami:** 25+ ta jadval
 
 ---
 
 ## 8. Dizayn Tizimi
 
-### NEXUS / ASUS Uslubi
+### Storefront (Light Glassmorphism)
 
 | Element | Qiymat |
 |---|---|
-| **Shriftlar** | `Outfit` (sarlavhalar) + `Inter` (matn) |
-| **Asosiy fon** | `linear-gradient(135deg, #f5f7fa, #c3cfe2)` |
-| **Glass panel** | `background: rgba(255,255,255,0.65)` + `backdrop-filter: blur(25px)` |
-| **Aksent rang** | `#006ce1` (ASUS ko'k) |
-| **Xavf rangi** | `#dc2626` (qizil) |
-| **Muvaffaqiyat** | `#16a34a` (yashil) |
-| **Burchaklar** | `16px – 28px` radius |
-| **Soyalar** | `0 15px 35px rgba(0,0,0,0.05)` |
+| Shriftlar | `Outfit` (sarlavha) + `Inter` (matn) |
+| Fon | `linear-gradient(135deg, #f5f7fa, #c3cfe2)` |
+| Glass karta | `rgba(255,255,255,0.65)` + `backdrop-filter: blur(25px)` |
+| Aksent rang | `#006ce1` (ASUS ko'k) |
+| Xavf rangi | `#dc2626` |
+| Muvaffaqiyat | `#16a34a` |
+| Radius | `16px – 28px` |
+| Soya | `0 15px 35px rgba(0,0,0,0.05)` |
 
-### Manager Panel (Floating Glass)
+### Manager Panel (Dark Glassmorphism)
 
 | Element | Qiymat |
 |---|---|
-| **Fon** | `#0a0e1a` (to'q ko'k-qora) |
-| **Glass card** | `rgba(255,255,255,0.04)` + `blur(20px)` |
-| **Aksent** | `#006ce1` |
-| **Chegaralar** | `rgba(255,255,255,0.08)` |
+| Fon | `#0a0e1a` (to'q ko'k-qora) |
+| Glass karta | `rgba(255,255,255,0.04)` + `blur(20px)` |
+| Aksent | `#006ce1` |
+| Chegara | `rgba(255,255,255,0.08)` |
 
 ---
 
 ## 9. Ishga Tushirish
 
-### Docker bilan (production-style)
+### Docker (Production uslubida)
+
 ```bash
 git clone https://github.com/Shakh07/Marketplace.git
 cd Marketplace
 docker-compose up --build -d
-# → http://localhost:8000
 ```
 
-### Lokal (development)
+`http://localhost:8000` da ochiladi.
+
+### Lokal (Development)
+
 ```bash
 python -m venv venv
-venv\Scripts\activate
+venv\Scripts\activate        # Windows
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py runserver
 ```
 
-### Muhim URL'lar
-| URL | Tavsif |
-|---|---|
-| `http://localhost:8000/` | Bosh sahifa |
-| `http://localhost:8000/manager/` | Admin panel |
-| `http://localhost:8000/admin/` | Django Unfold admin |
+### Foydali buyruqlar
+
+```bash
+# Test ma'lumotlarini yuklash
+python manage.py seed_data
+
+# Superuser yaratish
+python manage.py createsuperuser
+
+# Statik fayllarni yig'ish
+python manage.py collectstatic
+```
 
 ---
 
-## 10. Xulosa: Raqamlarda
+## 10. Loyiha Raqamlarda
 
 | Ko'rsatkich | Qiymat |
 |---|---|
-| **Django app'lar** | 8 ta |
-| **Database modellari** | 25+ ta |
-| **Veb-sahifalar** | 25 ta |
-| **REST API endpointlar** | 10 ta |
-| **HTML template fayllari** | 30+ ta |
-| **Partial (AJAX) templatelar** | 8 ta |
-| **Python kutubxonalari** | 17 ta |
-| **Dizayn uslubi** | ASUS/ROG Glassmorphism |
-| **Ma'lumotlar bazasi** | PostgreSQL 16 |
-| **Konteynerizatsiya** | Docker + Docker Compose |
-| **Veb-server** | Gunicorn (production) |
+| Django app'lar | 8 ta |
+| Database jadvallar | 25+ ta |
+| Veb-sahifalar | 25 ta |
+| REST API endpointlar | 10 ta |
+| HTML template fayllar | 30+ ta |
+| AJAX partial templatelar | 8 ta |
+| Python kutubxonalari | 17 ta |
+| Dizayn uslubi | ASUS/ROG Glassmorphism |
+| Ma'lumotlar bazasi | PostgreSQL 16 |
+| Konteynerizatsiya | Docker + Docker Compose |
+| Veb-server | Gunicorn (production) |
 
 ---
 
 ## 👨‍💻 Muallif
 
-**Shohruh** — Asosiy ishlab chiquvchi  
-GitHub: [@Shakh07](https://github.com/Shakh07)
+**Shohruh** — Loyihani ishlab chiquvchi  
+🔗 GitHub: [@Shakh07](https://github.com/Shakh07)  
+📁 Repo: [github.com/Shakh07/Marketplace](https://github.com/Shakh07/Marketplace)
 
 ---
 

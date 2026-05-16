@@ -1,36 +1,52 @@
-# NEXUS — Premium E-Commerce Platformasi
+# ⚡ NEXUS — Premium Elektronika Do'koni
 
-> O'zbekiston bozori uchun mo'ljallangan zamonaviy elektronika do'koni. ASUS uslubidagi premium dizayn, glassmorphism va real-time AJAX interfeysiga ega to'liq funksional e-commerce tizimi.
+<p align="center">
+  <img src="docs/assets/hero.png" alt="NEXUS Banner" width="100%"/>
+</p>
+
+<p align="center">
+  <b>O'zbekiston bozori uchun qurilgan zamonaviy e-commerce platforma</b><br/>
+  ASUS/ROG uslubidagi glassmorphism dizayn · AJAX real-time interfeys · Docker tayyor
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.12-blue?style=flat-square&logo=python" />
+  <img src="https://img.shields.io/badge/Django-6.0-green?style=flat-square&logo=django" />
+  <img src="https://img.shields.io/badge/PostgreSQL-16-blue?style=flat-square&logo=postgresql" />
+  <img src="https://img.shields.io/badge/Docker-ready-2496ED?style=flat-square&logo=docker" />
+  <img src="https://img.shields.io/badge/Muallif-Shohruh-blueviolet?style=flat-square" />
+</p>
 
 ---
 
-## ✨ Asosiy Imkoniyatlar
+## ✨ Imkoniyatlar
 
-| Imkoniyat | Tavsif |
-|---|---|
-| 🛍 **Premium Storefront** | ASUS / ROG uslubidagi glassmorphism dizayn, micro-animatsiyalar, mega-menu |
-| 🔍 **Real-time Qidiruv** | AJAX asosidagi tezkor qidiruv — sahifa yangilanmasdan ishlaydi |
-| 🗂 **Kategoriya Filtri** | Noutbuklar, Monitorlar, Aksessuarlar, Gaming bo'limlari bo'yicha filtrlash |
-| 🛒 **AJAX Savat** | Sahifa yangilanmasdan savatga qo'shish, badge real-time yangilanadi |
-| 📦 **Buyurtma Tizimi** | Checkout, buyurtma holati kuzatuvi, chek chiqarish |
-| 🖥 **Manager Paneli** | Glassmorphism uslubidagi admin panel — mahsulot, ombor, buyurtma boshqaruvi |
-| 🖼 **Image Cropper** | Drag & Drop rasm yuklash + Cropper.js bilan standart formatga solish |
-| 🐳 **To'liq Docker** | PostgreSQL + Gunicorn + WhiteNoise — bir buyruq bilan ishga tushadi |
+| # | Imkoniyat | Tavsif |
+|---|---|---|
+| 🛍 | **Premium Storefront** | ASUS/ROG glassmorphism dizayn, micro-animatsiyalar, mega-menu |
+| 🔍 | **Real-time Qidiruv** | AJAX asosida — sahifa yangilanmasdan ishlaydi |
+| 🗂 | **Kategoriya Filtri** | Noutbuklar, Monitorlar, Aksessuarlar, Gaming bo'limlari |
+| 🛒 | **AJAX Savat** | Savatga qo'shish, miqdor o'zgartirish — real-time badge |
+| 📦 | **Buyurtma Tizimi** | Checkout, holat kuzatuvi, chek chiqarish |
+| 🖥 | **Manager Panel** | Glassmorphism admin — mahsulot, ombor, buyurtma, foydalanuvchilar |
+| 🖼 | **Image Cropper** | Drag & Drop rasm + Cropper.js bilan standart formatga solish |
+| 🐳 | **Docker** | PostgreSQL + Gunicorn + WhiteNoise — bitta buyruq bilan ishga tushadi |
+| 📊 | **Dashboard Analytics** | Daromad, foyda, xarajat va sotuvlar statistikasi |
 
 ---
 
 ## 🛠 Texnologiyalar
 
 ### Backend
-- **Python 3.12** + **Django 6.0** + **Django REST Framework**
-- **PostgreSQL 16** (production) / SQLite (development)
+- **Python 3.12** · **Django 6.0** · **Django REST Framework 3.17**
+- **PostgreSQL 16** (production) · SQLite (development)
 - **Gunicorn** — production WSGI server
-- **WhiteNoise** — statik fayllar uchun
+- **WhiteNoise** — statik fayllar
 
 ### Frontend
-- **Django Templates** + **Vanilla CSS** + **Vanilla JS**
-- **Glassmorphism** dizayn tizimi (`backdrop-filter: blur`)
-- **Inter** + **Outfit** shriftlari (Google Fonts)
+- **Django Templates** · **Vanilla CSS** · **Vanilla JavaScript**
+- **Glassmorphism** dizayn (`backdrop-filter: blur`)
+- **Google Fonts** — Inter + Outfit
 - **AJAX (Fetch API)** — partial template pattern
 
 ### DevOps
@@ -43,7 +59,7 @@
 
 ## 🚀 Ishga Tushirish
 
-### Docker bilan (tavsiya etiladi)
+### 🐳 Docker bilan (tavsiya etiladi)
 
 ```bash
 git clone https://github.com/Shakh07/Marketplace.git
@@ -51,9 +67,9 @@ cd Marketplace
 docker-compose up -d --build
 ```
 
-Dastur `http://localhost:8000` da ishga tushadi.
+Dastur avtomatik ravishda `http://localhost:8000` da ishga tushadi.
 
-### Lokal (development)
+### 💻 Lokal (development)
 
 ```bash
 python -m venv venv
@@ -63,43 +79,45 @@ python manage.py migrate
 python manage.py runserver
 ```
 
-### Test ma'lumotlarini yuklash (ixtiyoriy)
+### 🗄 Test ma'lumotlarini yuklash
 
 ```bash
-docker-compose exec web python manage.py loaddata datadump.json
+python manage.py seed_data
 ```
 
 ---
 
-## 🌐 Sahifalar
+## 🌐 Asosiy Sahifalar
 
 | URL | Tavsif |
 |---|---|
-| `http://localhost:8000/` | Bosh sahifa (hero, kategoriyalar, featured mahsulotlar) |
-| `http://localhost:8000/products/` | Barcha mahsulotlar katalogi |
-| `http://localhost:8000/products/?category=laptops` | Kategoriya bo'yicha filtrlash |
-| `http://localhost:8000/cart/` | Savat |
-| `http://localhost:8000/manager/` | Manager boshqaruv paneli |
+| `/` | Bosh sahifa (hero banner, kategoriyalar, featured mahsulotlar) |
+| `/products/` | Mahsulotlar katalogi |
+| `/products/?category=laptops` | Kategoriya bo'yicha filtrlash |
+| `/cart/` | Xarid savati |
+| `/checkout/` | Buyurtma rasmiylashtirish |
+| `/orders/` | Buyurtmalar tarixi |
+| `/manager/` | Manager boshqaruv paneli |
+| `/admin/` | Django Unfold admin |
 
 ---
 
-## 📁 Fayl Tuzilishi
+## 📁 Tuzilishi
 
 ```
-nexus-ecommerce/
+Marketplace/
 ├── apps/
-│   ├── accounts/      # Foydalanuvchilar, autentifikatsiya, profil
+│   ├── accounts/      # Foydalanuvchilar va autentifikatsiya
 │   ├── catalog/       # Mahsulotlar, kategoriyalar, brendlar
 │   ├── orders/        # Savat, checkout, buyurtmalar
 │   ├── manager/       # Admin boshqaruv paneli
-│   ├── warehouse/     # Ombor va zaxira boshqaruvi
+│   ├── warehouse/     # Ombor va zaxira
 │   ├── reviews/       # Sharhlar tizimi
 │   ├── returns/       # Qaytarishlar
 │   └── suppliers/     # Yetkazib beruvchilar
-├── templates/         # HTML shablonlar (base.html, home.html, ...)
+├── templates/         # HTML shablonlar
 ├── static/            # CSS, JS, ikonkalar
-├── media/             # Yuklangan rasmlar
-├── ecommerce/         # Django loyiha sozlamalari (settings.py)
+├── ecommerce/         # Django loyiha sozlamalari
 ├── Dockerfile
 ├── docker-compose.yml
 ├── entrypoint.sh
@@ -110,8 +128,9 @@ nexus-ecommerce/
 
 ## 👨‍💻 Muallif
 
-**Shohruh** — Asosiy ishlab chiquvchi
+**Shohruh** — Loyihani ishlab chiquvchi  
+🔗 GitHub: [@Shakh07](https://github.com/Shakh07)
 
 ---
 
-*NEXUS — kelajak bu yerda.*
+<p align="center"><i>NEXUS — kelajak bu yerda.</i></p>
