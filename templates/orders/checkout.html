@@ -1,0 +1,563 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Rasmiylashtirish — NEXUS Premium{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --chk-bg: #f5f7fa;
+        --chk-dark: #000000;
+        --chk-accent: #006ce1;
+        --chk-gray-100: #f5f5f7;
+        --chk-gray-200: #e5e5e5;
+        --chk-gray-600: #86868b;
+        --f-head: 'Outfit', sans-serif;
+        --f-body: 'Inter', sans-serif;
+    }
+
+    .nexus-checkout-page {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        background-attachment: fixed;
+        font-family: var(--f-body);
+        padding-bottom: 120px;
+        color: var(--chk-dark);
+    }
+
+    /* ─── Glass Cards ─── */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.65);
+        backdrop-filter: blur(25px);
+        -webkit-backdrop-filter: blur(25px);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+        border-radius: 32px;
+        padding: 40px;
+        margin-bottom: 32px;
+    }
+
+    /* ─── Focus Header ─── */
+    .focus-header {
+        background: rgba(255,255,255,0.4);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(255,255,255,0.3);
+        padding: 24px 0;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+    }
+
+    .focus-header .container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    .focus-logo {
+        font-family: var(--f-head);
+        font-size: 24px;
+        font-weight: 900;
+        letter-spacing: 0.1em;
+        text-decoration: none;
+        color: #000;
+    }
+
+    .back-to-cart {
+        font-size: 11px;
+        font-weight: 800;
+        color: var(--chk-gray-600);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: 0.2s;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .back-to-cart:hover { color: #000; }
+
+    /* ─── Layout ─── */
+    .checkout-flow {
+        max-width: 760px;
+        margin: 60px auto 0;
+        padding: 0 20px;
+    }
+
+    .section-h2 {
+        font-family: var(--f-head);
+        font-size: 22px;
+        font-weight: 900;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 32px;
+    }
+    .step-num {
+        width: 28px;
+        height: 28px;
+        background: #000;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 800;
+        border-radius: 50%;
+    }
+
+    .btn-add-address {
+        background: rgba(0,0,0,0.05);
+        border: 1px solid rgba(0,0,0,0.1);
+        color: #000;
+        font-size: 11px;
+        font-weight: 800;
+        padding: 8px 16px;
+        cursor: pointer;
+        text-transform: uppercase;
+        border-radius: 12px;
+        transition: 0.2s;
+    }
+    .btn-add-address:hover { background: #000; color: #fff; }
+
+    /* Address Cards */
+    .address-grid { display: grid; gap: 12px; }
+    .address-item { position: relative; cursor: pointer; }
+    .address-item input { display: none; }
+    .address-box {
+        border: 2px solid transparent;
+        background: rgba(255,255,255,0.4);
+        padding: 24px;
+        border-radius: 24px;
+        transition: 0.2s;
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+    }
+    .address-item input:checked + .address-box {
+        border-color: #000;
+        background: rgba(255,255,255,0.8);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    }
+    .check-circle {
+        width: 20px;
+        height: 20px;
+        border: 2px solid #ddd;
+        border-radius: 50%;
+        flex-shrink: 0;
+        position: relative;
+        margin-top: 2px;
+    }
+    .address-item input:checked + .address-box .check-circle {
+        border-color: #000;
+        background: #000;
+    }
+    .address-item input:checked + .address-box .check-circle::after {
+        content: '';
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        background: #fff;
+        border-radius: 50%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .address-body strong { font-size: 16px; font-weight: 700; display: block; margin-bottom: 4px; }
+    .address-body p { font-size: 14px; color: #666; line-height: 1.5; margin: 0; }
+    
+    .btn-delete-addr {
+        position: absolute;
+        right: 20px;
+        top: 20px;
+        background: rgba(255,59,48,0.1);
+        border: none;
+        color: #ff3b30;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: 0.2s;
+        cursor: pointer;
+    }
+    .address-item:hover .btn-delete-addr { opacity: 1; }
+
+    /* Payment Methods */
+    .payment-grid { display: grid; gap: 12px; }
+    .pay-item { cursor: pointer; }
+    .pay-item input { display: none; }
+    .pay-box {
+        background: rgba(255,255,255,0.4);
+        border: 2px solid transparent;
+        padding: 20px 24px;
+        border-radius: 24px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        transition: 0.2s;
+    }
+    .pay-item input:checked + .pay-box {
+        border-color: #000;
+        background: rgba(255,255,255,0.8);
+    }
+    .pay-icon {
+        width: 44px;
+        height: 44px;
+        background: #fff;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #000;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+    }
+
+    /* ─── Summary ─── */
+    .summary-card {
+        margin-top: 48px;
+    }
+    .sum-items-mini {
+        display: flex;
+        gap: 10px;
+        overflow-x: auto;
+        padding-bottom: 20px;
+        margin-bottom: 30px;
+    }
+    .sum-item-thumb {
+        width: 60px;
+        height: 60px;
+        background: #fff;
+        border-radius: 12px;
+        padding: 5px;
+        flex-shrink: 0;
+        position: relative;
+    }
+    .sum-item-thumb img { width: 100%; height: 100%; object-fit: contain; }
+    .sum-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: #000;
+        color: #fff;
+        font-size: 10px;
+        font-weight: 800;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-submit {
+        width: 100%;
+        height: 72px;
+        background: #000;
+        color: #fff;
+        border: none;
+        border-radius: 36px;
+        font-family: var(--f-head);
+        font-size: 17px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        cursor: pointer;
+        transition: 0.3s;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        margin-top: 20px;
+    }
+    .btn-submit:hover { transform: translateY(-3px); box-shadow: 0 25px 50px rgba(0,0,0,0.2); }
+    .btn-submit:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    /* ─── Modal ─── */
+    .n-modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.4);
+        backdrop-filter: blur(10px);
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+    .n-modal-content {
+        background: rgba(255,255,255,0.8);
+        backdrop-filter: blur(30px);
+        width: 100%;
+        max-width: 500px;
+        padding: 40px;
+        border-radius: 40px;
+        border: 1px solid rgba(255,255,255,0.5);
+        animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    .n-input {
+        width: 100%;
+        height: 52px;
+        background: rgba(255,255,255,0.5);
+        border: 1px solid rgba(0,0,0,0.05);
+        border-radius: 16px;
+        padding: 0 16px;
+        font-size: 15px;
+        font-weight: 600;
+        outline: none;
+        transition: 0.2s;
+    }
+    .n-input:focus { border-color: #000; background: #fff; }
+
+    @media (max-width: 768px) {
+        .checkout-flow { padding: 0 15px; margin-top: 30px; }
+        .glass-card { padding: 30px 20px; border-radius: 24px; }
+    }
+</style>
+
+<div class="nexus-checkout-page">
+    
+    <header class="focus-header">
+        <div class="container">
+            <a href="{% url 'cart' %}" class="back-to-cart">
+                <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="3" fill="none"><polyline points="15 18 9 12 15 6"/></svg>
+                SAVATCHAGA
+            </a>
+            <a href="/" class="focus-logo">NEXUS</a>
+            <div style="width:100px;"></div>
+        </div>
+    </header>
+
+    <div class="checkout-flow">
+        
+        <form method="POST" id="checkout-form">
+            {% csrf_token %}
+
+            <!-- Step 1: Address -->
+            <div class="glass-card">
+                <div class="section-title-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:32px;">
+                    <h2 class="section-h2" style="margin:0;">
+                        <span class="step-num">1</span>
+                        MANZIL
+                    </h2>
+                    <button type="button" class="btn-add-address" onclick="openAddressModal()">+ QO'SHISH</button>
+                </div>
+
+                {% if addresses %}
+                <div class="address-grid" id="checkout-address-list">
+                    {% for addr in addresses %}
+                    <div class="address-item" id="addr-row-{{ addr.id }}">
+                        <input type="radio" name="address_id" value="{{ addr.id }}" id="addr-{{ addr.id }}" {% if addr.is_default %}checked{% endif %}>
+                        <label class="address-box" for="addr-{{ addr.id }}">
+                            <div class="check-circle"></div>
+                            <div class="address-body">
+                                <strong>{{ addr.full_name }}</strong>
+                                <p>{{ addr.street_address }}, {{ addr.city }}</p>
+                                <p style="font-weight:700; color:#000; font-size:13px; margin-top:4px;">+998 {{ addr.phone }}</p>
+                            </div>
+                        </label>
+                        <button type="button" class="btn-delete-addr ajax-delete-address" data-addr-id="{{ addr.id }}">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M3 6h18m-2 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div id="empty-addr-notice" style="padding:40px; border:2px dashed rgba(0,0,0,0.1); border-radius:24px; text-align:center;">
+                    <p style="color:#888; font-weight:700; margin-bottom:20px;">Xarid uchun manzil qo'shing.</p>
+                    <button type="button" class="btn-add-address" style="height:44px; padding:0 30px;" onclick="openAddressModal()">MANZIL QO'SHISH</button>
+                </div>
+                <div class="address-grid" id="checkout-address-list"></div>
+                {% endif %}
+            </div>
+
+            <!-- Step 2: Payment -->
+            <div class="glass-card">
+                <h2 class="section-h2">
+                    <span class="step-num">2</span>
+                    TO'LOV
+                </h2>
+
+                <div class="payment-grid">
+                    <label class="pay-item">
+                        <input type="radio" name="payment_method" value="cash" checked>
+                        <div class="pay-box">
+                            <div class="pay-icon">
+                                <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/></svg>
+                            </div>
+                            <div class="pay-info">
+                                <strong style="font-size:14px; font-weight:800;">NAQD PUL</strong>
+                                <span style="font-size:12px; color:#666;">Yetkazib berishda</span>
+                            </div>
+                            <div class="check-circle" style="margin-left:auto;"></div>
+                        </div>
+                    </label>
+                    
+                    <label class="pay-item">
+                        <input type="radio" name="payment_method" value="card">
+                        <div class="pay-box">
+                            <div class="pay-icon">
+                                <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                            </div>
+                            <div class="pay-info">
+                                <strong style="font-size:14px; font-weight:800;">KARTA</strong>
+                                <span style="font-size:12px; color:#666;">Onlayn yoki terminal</span>
+                            </div>
+                            <div class="check-circle" style="margin-left:auto;"></div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Summary Card -->
+            <div class="glass-card summary-card">
+                <h2 class="section-h2" style="margin-bottom:24px;">YAKUNIY XULOSA</h2>
+                
+                <div class="sum-items-mini">
+                    {% for item in cart_items %}
+                    <div class="sum-item-thumb">
+                        {% if item.product.images.first %}
+                        <img src="{{ item.product.images.first.image_url.url }}">
+                        {% endif %}
+                        <span class="sum-badge">{{ item.quantity }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-weight:600; font-size:14px; color:#666;">
+                    <span>Mahsulotlar</span>
+                    <span>{{ total|floatformat:0|intcomma }} so'm</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:30px; font-weight:600; font-size:14px; color:#666;">
+                    <span>Yetkazib berish</span>
+                    <span style="color:#15803d;">Bepul</span>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid rgba(0,0,0,0.05); padding-top:24px; margin-bottom:32px;">
+                    <span style="font-size:16px; font-weight:800;">JAMI:</span>
+                    <span style="font-family:var(--f-head); font-size:32px; font-weight:900;">{{ total|floatformat:0|intcomma }} <span style="font-size:14px; font-weight:600; color:#999;">so'm</span></span>
+                </div>
+
+                <button type="submit" class="btn-submit" id="checkout-submit-btn">BUYURTMANI TASDIQLASH</button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<!-- Modal -->
+<div id="add-address-modal" class="n-modal" onclick="if(event.target===this)closeAddressModal()">
+    <div class="n-modal-content">
+        <h3 style="font-family:var(--f-head); font-size:22px; font-weight:900; margin-bottom:32px; text-align:center;">YANGI MANZIL</h3>
+        
+        <form id="add-address-form" method="POST" action="{% url 'checkout' %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="add_address">
+            
+            <div style="margin-bottom:16px;">
+                <label style="display:block; font-size:11px; font-weight:800; color:#888; margin-bottom:8px;">TO'LIQ ISM</label>
+                <input type="text" name="full_name" class="n-input" required>
+            </div>
+
+            <div style="margin-bottom:16px;">
+                <label style="display:block; font-size:11px; font-weight:800; color:#888; margin-bottom:8px;">TELEFON</label>
+                <div style="display:flex; align-items:center; background:rgba(255,255,255,0.5); border-radius:16px; border:1px solid rgba(0,0,0,0.05); overflow:hidden;">
+                    <span style="padding:0 12px; font-weight:800; font-size:14px;">+998</span>
+                    <input type="text" name="phone" class="n-input" style="border:none; background:transparent;" placeholder="90 123 45 67" required>
+                </div>
+            </div>
+
+            <div style="margin-bottom:16px;">
+                <label style="display:block; font-size:11px; font-weight:800; color:#888; margin-bottom:8px;">MANZIL VA MO'LJAL</label>
+                <input type="text" name="street_address" class="n-input" required>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:32px;">
+                <div>
+                    <label style="display:block; font-size:11px; font-weight:800; color:#888; margin-bottom:8px;">SHAHAR / TUMAN</label>
+                    <input type="text" name="city" class="n-input" required>
+                </div>
+                <div>
+                    <label style="display:block; font-size:11px; font-weight:800; color:#888; margin-bottom:8px;">VILOYAT</label>
+                    <input type="text" name="region" class="n-input">
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit" style="height:60px; border-radius:30px; box-shadow:none; margin-top:0;">SAQLASH</button>
+        </form>
+    </div>
+</div>
+
+<script>
+const CHECKOUT_URL = "{% url 'checkout' %}";
+const CSRF_TOKEN = '{{ csrf_token }}';
+
+function openAddressModal() { document.getElementById('add-address-modal').style.display='flex'; }
+function closeAddressModal() { document.getElementById('add-address-modal').style.display='none'; }
+
+function validate() {
+    const btn = document.getElementById('checkout-submit-btn');
+    const checked = document.querySelector('input[name="address_id"]:checked');
+    if (checked) {
+        btn.disabled = false;
+        btn.innerHTML = 'BUYURTMANI TASDIQLASH';
+    } else {
+        btn.disabled = true;
+        btn.innerHTML = 'MANZIL TANLANMAGAN';
+    }
+}
+
+document.addEventListener('change', e => {
+    if (e.target.name === 'address_id') validate();
+});
+
+// AJAX logic for address management
+document.addEventListener('click', async e => {
+    const btn = e.target.closest('.ajax-delete-address');
+    if (!btn) return;
+    if (!confirm('Manzilni o\'chirmoqchimisiz?')) return;
+    
+    const id = btn.dataset.addrId;
+    const row = document.getElementById('addr-row-'+id);
+    row.style.opacity = '0.3';
+    
+    const fd = new FormData();
+    fd.append('csrfmiddlewaretoken', CSRF_TOKEN);
+    fd.append('action', 'delete_address');
+    fd.append('address_id', id);
+    
+    try {
+        const res = await fetch(CHECKOUT_URL, { method:'POST', body:fd, headers:{'X-Requested-With':'XMLHttpRequest'} });
+        const data = await res.json();
+        if (data.success) {
+            row.remove();
+            validate();
+            if (document.querySelectorAll('.address-item').length === 0) window.location.reload();
+        } else { row.style.opacity = '1'; }
+    } catch(err) { row.style.opacity = '1'; }
+});
+
+document.getElementById('add-address-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const f = e.target;
+    const btn = f.querySelector('[type="submit"]');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '...';
+    btn.disabled = true;
+    
+    try {
+        const res = await fetch(CHECKOUT_URL, { method:'POST', body:new FormData(f), headers:{'X-Requested-With':'XMLHttpRequest'} });
+        const data = await res.json();
+        if (data.success) { window.location.reload(); }
+        else { alert(data.error); btn.innerHTML = orig; btn.disabled = false; }
+    } catch(err) { btn.innerHTML = orig; btn.disabled = false; }
+});
+
+validate();
+</script>
+{% endblock %}

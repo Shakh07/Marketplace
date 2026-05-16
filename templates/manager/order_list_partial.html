@@ -1,0 +1,48 @@
+{% load custom_filters %}
+{% for order in orders %}
+<tr style="transition: all 0.3s;">
+    <td>
+        <a href="{% url 'manager_order_detail' order.id %}" style="font-family: 'Outfit', sans-serif; font-weight: 800; color: var(--nexus-blue); text-decoration: none; font-size: 15px;">#{{ order.order_number }}</a>
+    </td>
+    <td>
+        <div style="font-weight: 700; color: var(--nexus-dark);">{{ order.user.get_full_name|default:order.user.username }}</div>
+        <div style="font-size: 12px; color: var(--text-muted); font-weight: 600;">{{ order.user.phone|default:order.user.email }}</div>
+    </td>
+    <td>
+        <div style="display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--text-muted);">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none" style="opacity: 0.6;"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line></svg>
+            {{ order.items.count }} ta mahsulot
+        </div>
+    </td>
+    <td>
+        <span class="pill pill-{{ order.order_status }}">{{ order.get_order_status_display }}</span>
+    </td>
+    <td>
+        <span class="pill pill-{{ order.payment_status }}">{{ order.get_payment_status_display }}</span>
+    </td>
+    <td>
+        <div style="font-family: 'Outfit', sans-serif; font-weight: 800; color: var(--nexus-dark); font-size: 16px;">{{ order.total_amount|floatformat:0|intspace }}</div>
+        <div style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">so'm</div>
+    </td>
+    <td style="color: var(--text-muted); font-size: 13px; font-weight: 600;">
+        {{ order.created_at|date:"d.m.Y" }}<br>
+        <span style="opacity: 0.6; font-size: 11px;">{{ order.created_at|date:"H:i" }}</span>
+    </td>
+    <td style="text-align: right;">
+        <a href="{% url 'manager_order_detail' order.id %}" class="mgr-btn mgr-btn-secondary" style="padding: 8px 16px; font-size: 12px; border-radius: 10px;">
+            Ko'rish
+            <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="3" fill="none"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </a>
+    </td>
+</tr>
+{% empty %}
+<tr>
+    <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 100px 40px;">
+        <div style="margin-bottom: 16px; opacity: 0.2;">
+            <svg viewBox="0 0 24 24" width="64" height="64" stroke="currentColor" stroke-width="1.5" fill="none"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+        </div>
+        <div style="font-size: 18px; font-weight: 700; color: var(--nexus-dark); margin-bottom: 6px;">Buyurtmalar topilmadi</div>
+        <div style="font-size: 14px; font-weight: 500;">Siz tanlagan filtrlar bo'yicha hech qanday natija mavjud emas.</div>
+    </td>
+</tr>
+{% endfor %}

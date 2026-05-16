@@ -1,0 +1,101 @@
+{% extends 'manager/base_manager.html' %}
+
+{% block page_title %}{% if is_edit %}Brendni tahrirlash{% else %}Yangi Brend{% endif %}{% endblock %}
+{% block nav_brands %}active{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px;">
+    <!-- Page Header -->
+    <div style="margin-bottom: 24px;">
+        <a href="{% url 'manager_brand_list' %}" style="display: inline-flex; align-items: center; gap: 6px; color: #0071e3; font-size: 14px; font-weight: 500; text-decoration: none; margin-bottom: 16px;">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            Ortga qaytish
+        </a>
+        <h1 style="font-size: 28px; font-weight: 700; letter-spacing: -0.02em; color: #1d1d1f; margin: 0;">{% if is_edit %}Brendni O'zgartirish{% else %}Yangi Brend Qo'shish{% endif %}</h1>
+    </div>
+
+    <!-- Form Section -->
+    <form method="POST" enctype="multipart/form-data" 
+          style="background: #ffffff; box-shadow: 0 4px 24px rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.05); border-radius: 20px; padding: 32px;">
+        {% csrf_token %}
+        
+        <div style="display: flex; flex-direction: column; gap: 24px;">
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                <div>
+                    <label style="display: block; font-size: 13px; font-weight: 600; color: #1d1d1f; margin-bottom: 8px;">Brend Nomi *</label>
+                    {{ form.brand_name }}
+                    <div style="font-size: 12px; color: #86868b; margin-top: 6px;">Masalan: Apple, Samsung, Asus</div>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 13px; font-weight: 600; color: #1d1d1f; margin-bottom: 8px;">Veb-sayt (opsional)</label>
+                    {{ form.website_url }}
+                    <div style="font-size: 12px; color: #86868b; margin-top: 6px;">Masalan: https://apple.com</div>
+                </div>
+            </div>
+            
+            <div style="padding-top: 16px; border-top: 1px solid rgba(0,0,0,0.06);">
+                <label style="display: block; font-size: 13px; font-weight: 600; color: #1d1d1f; margin-bottom: 12px;">Brend Logosi (opsional)</label>
+                {% if is_edit and brand.logo_url %}
+                <div style="margin-bottom: 16px; width: 80px; height: 80px; border-radius: 16px; background: #ffffff; border: 1px solid rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 4px;">
+                    <img src="{{ brand.logo_url.url }}" alt="img" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                </div>
+                {% endif %}
+                <div class="custom-file-wrap">
+                    {{ form.logo_url }}
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 12px; align-items: center; margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(0,0,0,0.06);">
+                {{ form.is_active }}
+                <label for="{{ form.is_active.id_for_label }}" style="font-size: 14px; font-weight: 500; color: #1d1d1f; cursor: pointer;">Aktiv (Do'konda ko'rsatish)</label>
+            </div>
+        </div>
+
+        <div style="margin-top: 32px; display: flex; align-items: center; gap: 16px;">
+            <button type="submit" style="background: #0071e3; color: white; padding: 12px 28px; border-radius: 999px; border: none; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#0066cc'" onmouseout="this.style.background='#0071e3'">Saqlash</button>
+            <a href="{% url 'manager_brand_list' %}" style="color: #1d1d1f; font-size: 15px; font-weight: 500; text-decoration: none;">Bekor qilish</a>
+        </div>
+    </form>
+</div>
+
+<style>
+/* Style the form fields */
+input[type="text"], input[type="url"], textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(0,0,0,0.15);
+    background: #fdfdfd;
+    font-family: inherit;
+    font-size: 15px;
+    color: #1d1d1f;
+    outline: none;
+    transition: all 0.2s;
+    box-sizing: border-box;
+}
+input[type="text"]:focus, input[type="url"]:focus, textarea:focus {
+    border-color: #0071e3;
+    box-shadow: 0 0 0 3px rgba(0,113,227,0.1);
+    background: #ffffff;
+}
+input[type="file"] {
+    font-size: 14px;
+    color: #48484a;
+}
+input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: #0071e3;
+    cursor: pointer;
+}
+</style>
+
+{% include 'manager/includes/image_cropper.html' %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Aspect ratio for logos (Rectangle 16:9 or Square usually, we will use NaN to allow free crop)
+    new ImageUploader('id_logo_url');
+});
+</script>
+{% endblock %}

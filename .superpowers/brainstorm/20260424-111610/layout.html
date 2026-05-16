@@ -1,0 +1,31 @@
+<h2>Glassmorphism uslubida qanday joylashuv ma'qul?</h2>
+<p class="subtitle">B uslubini tanladingiz. Endi elementlar qanday joylashishini ko'rib chiqamiz.</p>
+
+<div class="options">
+  <div class="option" data-choice="split" onclick="toggleSelect(this)">
+    <div class="letter">1</div>
+    <div class="content">
+      <h3>Split Screen (Bo'lingan ekran)</h3>
+      <p>Chap tomonda barcha qadamlar toza oq fonda, o'ng tomonda esa xaridlar ro'yxati xiralashtirilgan (glassy) panelda turadi.</p>
+      <div style="margin-top:15px; display:flex; border:1px solid #eee; height:80px; border-radius:8px; overflow:hidden;">
+        <div style="flex:2; background:#fff; padding:10px;">
+          <div style="width:100%; height:10px; background:#f0f0f0; margin-bottom:5px;"></div>
+          <div style="width:80%; height:10px; background:#f0f0f0;"></div>
+        </div>
+        <div style="flex:1; background:rgba(0,108,225,0.05); backdrop-filter:blur(4px); border-left:1px solid rgba(0,0,0,0.05);"></div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="option" data-choice="cards" onclick="toggleSelect(this)">
+    <div class="letter">2</div>
+    <div class="content">
+      <h3>Floating Cards (Suzib yuruvchi kartochkalar)</h3>
+      <p>Barcha qadamlar va xulosa alohida shishasimon kartochkalarda, umumiy xira fon ustida joylashadi.</p>
+      <div style="margin-top:15px; background:#f8f9fa; padding:15px; border-radius:8px; display:flex; flex-direction:column; gap:10px;">
+         <div style="width:100%; height:20px; background:rgba(255,255,255,0.8); border:1px solid rgba(0,0,0,0.05); border-radius:10px; backdrop-filter:blur(5px);"></div>
+         <div style="width:100%; height:20px; background:rgba(255,255,255,0.8); border:1px solid rgba(0,0,0,0.05); border-radius:10px; backdrop-filter:blur(5px);"></div>
+      </div>
+    </div>
+  </div>
+</div>

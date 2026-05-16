@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Savatcha — NEXUS Premium{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --f-head: 'Outfit', sans-serif;
+        --f-body: 'Inter', sans-serif;
+    }
+
+    .cart-page {
+        padding: 40px 20px 120px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .cart-header-glass {
+        padding: 40px;
+        margin-bottom: 40px;
+        text-align: center;
+    }
+    .cart-h1 { font-family: var(--f-head); font-size: 42px; font-weight: 900; margin-bottom: 10px; }
+    .cart-p { color: #888; font-weight: 600; font-size: 15px; }
+
+    .cart-grid {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 32px;
+        align-items: start;
+    }
+
+    /* Item Card Glass */
+    .glass-cart-item {
+        background: rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: 28px;
+        padding: 24px;
+        margin-bottom: 20px;
+        display: grid;
+        grid-template-columns: 100px 1fr auto;
+        gap: 24px;
+        align-items: center;
+        transition: 0.3s;
+    }
+    .glass-cart-item:hover { background: rgba(255, 255, 255, 0.6); transform: translateX(5px); }
+
+    .item-img {
+        width: 100px;
+        height: 100px;
+        background: #fff;
+        border-radius: 16px;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .item-img img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+    .item-name { font-family: var(--f-head); font-size: 18px; font-weight: 800; color: #000; text-decoration: none; margin-bottom: 8px; display: block; }
+    .item-brand { font-size: 10px; font-weight: 900; color: #006ce1; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 15px; display: block; }
+
+    .qty-ctrl {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: rgba(0,0,0,0.04);
+        padding: 6px 12px;
+        border-radius: 12px;
+        width: fit-content;
+    }
+    .qty-ctrl button { width: 24px; height: 24px; border-radius: 50%; border: none; background: #fff; cursor: pointer; font-weight: 900; transition: 0.2s; }
+    .qty-ctrl button:hover { background: #000; color: #fff; }
+    .qty-ctrl .val { font-weight: 800; font-size: 14px; min-width: 20px; text-align: center; }
+
+    .item-price { font-family: var(--f-head); font-size: 18px; font-weight: 900; text-align: right; }
+
+    /* Summary Glass */
+    .glass-summary {
+        padding: 40px;
+        position: sticky;
+        top: 100px;
+    }
+    .summary-title { font-family: var(--f-head); font-size: 20px; font-weight: 900; margin-bottom: 24px; text-transform: uppercase; }
+    .sum-row { display: flex; justify-content: space-between; margin-bottom: 16px; font-size: 14px; font-weight: 600; }
+    .sum-row .lbl { color: #888; }
+    .sum-total { border-top: 1px solid rgba(0,0,0,0.05); margin-top: 24px; padding-top: 24px; }
+    .sum-total .val { font-family: var(--f-head); font-size: 28px; font-weight: 900; }
+
+    .btn-checkout { width: 100%; height: 64px; background: #000; color: #fff; border: none; border-radius: 32px; font-family: var(--f-head); font-size: 16px; font-weight: 800; letter-spacing: 1px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; margin-top: 32px; }
+    .btn-checkout:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+
+    .empty-state { text-align: center; padding: 120px 20px; }
+
+    @media (max-width: 1024px) {
+        .cart-grid { grid-template-columns: 1fr; }
+        .glass-summary { position: static; }
+        .glass-cart-item { grid-template-columns: 80px 1fr; }
+        .item-price { grid-column: 1 / -1; text-align: left; margin-top: 10px; }
+    }
+</style>
+
+<div class="cart-page">
+    <div class="glass-panel cart-header-glass">
+        <h1 class="cart-h1">Savatcha</h1>
+        <p class="cart-p">Xaridlaringizni ko'rib chiqing va buyurtmani rasmiylashtiring.</p>
+    </div>
+
+    {% if cart_items %}
+    <div class="cart-grid" id="cart-root">
+        <div class="items-col">
+            {% for item in cart_items %}
+            <div class="glass-cart-item">
+                <div class="item-img">
+                    {% if item.product.images.first %}
+                    <img src="{{ item.product.images.first.image_url.url }}">
+                    {% endif %}
+                </div>
+                <div class="item-info">
+                    <span class="item-brand">{{ item.product.brand.brand_name }}</span>
+                    <a href="{% url 'product_detail' item.product.slug %}" class="item-name">{{ item.product.product_name }}</a>
+                    
+                    <div class="qty-ctrl">
+                        <form method="POST" action="{% url 'add_to_cart' item.product.id %}" style="display:contents;">
+                            {% csrf_token %}<input type="hidden" name="quantity" value="-1"><button type="submit">−</button>
+                        </form>
+                        <span class="val">{{ item.quantity }}</span>
+                        <form method="POST" action="{% url 'add_to_cart' item.product.id %}" style="display:contents;">
+                            {% csrf_token %}<input type="hidden" name="quantity" value="1"><button type="submit">+</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="item-price">
+                    {{ item.item_total|floatformat:0|intcomma }} <span style="font-size:12px; color:#999;">so'm</span>
+                    <form method="POST" action="{% url 'remove_from_cart' item.id %}" style="margin-top:10px;">
+                        {% csrf_token %}
+                        <button type="submit" style="background:none; border:none; color:#ff3b30; font-size:11px; font-weight:800; cursor:pointer; text-decoration:underline;">O'CHIRISH</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+
+            <div style="margin-top:40px;">
+                <a href="{% url 'product_list' %}" style="display:flex; align-items:center; gap:8px; font-weight:800; font-size:12px; color:#000; text-decoration:none; text-transform:uppercase;">
+                    <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="3" fill="none"><polyline points="15 18 9 12 15 6"/></svg>
+                    XARIDNI DAVOM ETTIRISH
+                </a>
+            </div>
+        </div>
+
+        <aside class="summary-col">
+            <div class="glass-panel glass-summary">
+                <h2 class="summary-title">Xulosa</h2>
+                <div class="sum-row"><span class="lbl">Mahsulotlar</span><span>{{ total|floatformat:0|intcomma }} so'm</span></div>
+                <div class="sum-row"><span class="lbl">Yetkazib berish</span><span style="color:#15803d;">Bepul</span></div>
+                <div class="sum-row"><span class="lbl">Soliqlar</span><span>Kiritilgan</span></div>
+                
+                <div class="sum-row sum-total">
+                    <span class="lbl" style="color:#000;">JAMI</span>
+                    <span class="val">{{ total|floatformat:0|intcomma }} so'm</span>
+                </div>
+
+                <a href="{% url 'checkout' %}" class="btn-checkout">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    RASMIYLASHTIRISH
+                </a>
+            </div>
+        </aside>
+    </div>
+    {% else %}
+    <div class="glass-panel empty-state">
+        <div style="font-size:80px; margin-bottom:30px;">🛒</div>
+        <h2 class="cart-h1">Savatcha bo'sh</h2>
+        <p class="cart-p" style="margin-bottom:40px;">Hali hech qanday mahsulot tanlanmagan.</p>
+        <a href="{% url 'product_list' %}" class="btn-checkout" style="display:inline-flex; width:auto; padding:0 60px;">XARIDNI BOSHLASH</a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+// AJAX Cart logic
+document.addEventListener('submit', async (e) => {
+    const form = e.target;
+    if (form.action.includes('cart')) {
+        e.preventDefault();
+        const url = form.action + (form.action.includes('?') ? '&' : '?') + 'ajax=1';
+        await fetch(url, { method: 'POST', body: new FormData(form), headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+        window.location.reload();
+    }
+});
+</script>
+{% endblock %}

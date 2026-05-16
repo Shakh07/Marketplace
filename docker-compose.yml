@@ -1,0 +1,36 @@
+
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: onyx_db
+      POSTGRES_USER: onyx_user
+      POSTGRES_PASSWORD: onyx_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  web:
+    build: .
+    command: /app/entrypoint.sh
+    restart: unless-stopped
+    volumes:
+      - .:/app
+      - ./media:/app/media
+      - static_volume:/app/staticfiles
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgres://onyx_user:onyx_password@db:5432/onyx_db
+      - DEBUG=True
+      - SECRET_KEY=onyx-secret-key-change-in-production
+      - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
+      - CSRF_TRUSTED_ORIGINS=http://localhost:8000,http://127.0.0.1:8000
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
+  static_volume:

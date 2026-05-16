@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}NEXUS Admin{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Cropper.js -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+    <style>
+        :root {
+            --blue:      #006ce1;
+            --blue-dk:   #0058c0;
+            --black:     #000;
+            --white:     #fff;
+            --g50:       #f7f7f7;
+            --g100:      #efefef;
+            --g200:      #e0e0e0;
+            --g400:      #aaa;
+            --g600:      #555;
+            --g800:      #1a1a1a;
+            --topbar-h:  48px;
+            --subnav-h:  44px;
+            --sidebar-w: 200px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; font-family: 'Inter', sans-serif; font-size: 14px; background: var(--g50); color: var(--black); }
+        a { color: inherit; text-decoration: none; }
+
+        /* ══════════════════════════════════════════
+           TOP BAR — qora, brend bar
+        ══════════════════════════════════════════ */
+        .adm-topbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: var(--topbar-h);
+            background: var(--black);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 300;
+        }
+
+        .adm-brand {
+            font-family: 'Outfit', sans-serif;
+            font-size: 18px;
+            font-weight: 900;
+            color: white;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .adm-brand-badge {
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            background: var(--blue);
+            color: white;
+            padding: 2px 7px;
+            border-radius: 2px;
+        }
+
+        .adm-topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .adm-user-pill {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+        }
+        .adm-user-av {
+            width: 28px; height: 28px;
+            background: var(--blue);
+            border-radius: 2px;
+            font-size: 11px;
+            font-weight: 800;
+            color: white;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .adm-user-nm { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.75); }
+        .adm-topbar-link {
+            font-size: 12px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.4);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.15s;
+        }
+        .adm-topbar-link:hover { color: rgba(255,255,255,0.8); }
+        .adm-topbar-link svg { width: 13px; height: 13px; stroke: currentColor; stroke-width: 2.5; fill: none; }
+
+        /* ══════════════════════════════════════════
+           SUB NAV BAR — oq, asosiy navigatsiya
+        ══════════════════════════════════════════ */
+        .adm-subnav {
+            position: fixed;
+            top: var(--topbar-h);
+            left: 0; right: 0;
+            height: var(--subnav-h);
+            background: var(--white);
+            border-bottom: 1px solid var(--g200);
+            display: flex;
+            align-items: stretch;
+            padding: 0 20px;
+            z-index: 290;
+            gap: 0;
+        }
+
+        .adm-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 0 16px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--g600);
+            border-bottom: 2px solid transparent;
+            transition: all 0.15s;
+            white-space: nowrap;
+            position: relative;
+        }
+        .adm-nav-item svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2; fill: none; flex-shrink: 0; }
+        .adm-nav-item:hover { color: var(--black); background: var(--g50); }
+        .adm-nav-item.active { color: var(--blue); border-bottom-color: var(--blue); }
+        .adm-nav-badge {
+            background: var(--blue);
+            color: white;
+            font-size: 9px;
+            font-weight: 800;
+            padding: 1px 5px;
+            border-radius: 8px;
+            min-width: 16px;
+            text-align: center;
+        }
+
+        .adm-subnav-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+        }
+
+        /* ══════════════════════════════════════════
+           LAYOUT — sidebar yokki yo'q
+        ══════════════════════════════════════════ */
+        .adm-wrapper {
+            display: flex;
+            margin-top: calc(var(--topbar-h) + var(--subnav-h));
+            min-height: calc(100vh - var(--topbar-h) - var(--subnav-h));
+        }
+
+        /* Left sidebar — faqat context nav uchun (ixtiyoriy) */
+        .adm-sidebar {
+            width: var(--sidebar-w);
+            background: var(--white);
+            border-right: 1px solid var(--g200);
+            flex-shrink: 0;
+            padding: 20px 0;
+        }
+        .adm-sidebar-title {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--g400);
+            padding: 0 16px 8px;
+        }
+        .adm-sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 16px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--g600);
+            transition: all 0.15s;
+            border-left: 2px solid transparent;
+        }
+        .adm-sidebar-item svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2; fill: none; }
+        .adm-sidebar-item:hover { color: var(--black); background: var(--g50); }
+        .adm-sidebar-item.active { color: var(--blue); border-left-color: var(--blue); background: rgba(0,108,225,0.04); }
+
+        /* ── Main Content ── */
+        .adm-main {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .adm-page-header {
+            background: white;
+            border-bottom: 1px solid var(--g200);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .adm-page-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--black);
+            letter-spacing: -0.01em;
+        }
+        .adm-topbar-actions { display: flex; align-items: center; gap: 8px; }
+
+        .adm-content { padding: 20px 24px; }
+
+        /* ── Buttons ── */
+        .adm-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            height: 34px;
+            padding: 0 14px;
+            font-size: 12px;
+            font-weight: 700;
+            border: 1px solid var(--g200);
+            background: var(--white);
+            color: var(--g800);
+            cursor: pointer;
+            transition: all 0.15s;
+            border-radius: 0;
+            text-decoration: none;
+            white-space: nowrap;
+            letter-spacing: 0.02em;
+        }
+        .adm-btn svg { width: 13px; height: 13px; stroke: currentColor; stroke-width: 2.5; fill: none; }
+        .adm-btn:hover { background: var(--g100); color: var(--black); }
+        .adm-btn-primary { background: var(--blue); color: white; border-color: var(--blue); }
+        .adm-btn-primary:hover { background: var(--blue-dk); color: white; border-color: var(--blue-dk); }
+        .adm-btn-danger { color: #dc2626; border-color: #fecaca; }
+        .adm-btn-danger:hover { background: #fef2f2; }
+
+        /* ── Alerts ── */
+        .adm-alert { padding: 12px 16px; font-size: 13px; font-weight: 600; margin-bottom: 14px; border-left: 3px solid; }
+        .adm-alert-success { background: #f0fdf4; color: #166534; border-color: #16a34a; }
+        .adm-alert-error   { background: #fef2f2; color: #991b1b; border-color: #dc2626; }
+        .adm-alert-warning { background: #fffbeb; color: #92400e; border-color: #f59e0b; }
+
+        /* ── Cards ── */
+        .adm-card { background: var(--white); border: 1px solid var(--g200); margin-bottom: 16px; }
+        .adm-card-head { padding: 13px 18px; border-bottom: 1px solid var(--g200); display: flex; align-items: center; justify-content: space-between; }
+        .adm-card-title { font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--g600); }
+        .adm-card-body { padding: 18px; }
+
+        /* ── Tables ── */
+        .adm-table-wrap { overflow-x: auto; }
+        .adm-table { width: 100%; border-collapse: collapse; }
+        .adm-table th { text-align: left; padding: 9px 14px; font-size: 10px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--g400); background: var(--g50); border-bottom: 1px solid var(--g200); white-space: nowrap; }
+        .adm-table td { padding: 13px 14px; font-size: 13px; border-bottom: 1px solid var(--g100); vertical-align: middle; }
+        .adm-table tr:last-child td { border-bottom: none; }
+        .adm-table tbody tr:hover td { background: var(--g50); }
+
+        /* ── Pills ── */
+        .pill { display: inline-flex; align-items: center; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 2px; text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }
+        .pill-pending    { background: rgba(234,88,12,0.1);  color: #c05621; }
+        .pill-paid       { background: rgba(22,163,74,0.1);  color: #15803d; }
+        .pill-delivered  { background: rgba(22,163,74,0.12); color: #166534; }
+        .pill-confirmed  { background: rgba(0,108,225,0.1);  color: var(--blue); }
+        .pill-processing { background: rgba(37,99,235,0.1);  color: #1d4ed8; }
+        .pill-shipped    { background: rgba(124,58,237,0.1); color: #6d28d9; }
+        .pill-cancelled  { background: rgba(220,38,38,0.08); color: #b91c1c; }
+
+        /* ── KPI ── */
+        .kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 16px; }
+        @media(max-width:1100px) { .kpi-grid { grid-template-columns: repeat(2,1fr); } }
+        .kpi-card { background: white; border: 1px solid var(--g200); border-top: 3px solid transparent; padding: 18px; }
+        .kpi-card.blue   { border-top-color: var(--blue); }
+        .kpi-card.green  { border-top-color: #16a34a; }
+        .kpi-card.orange { border-top-color: #ea580c; }
+        .kpi-card.purple { border-top-color: #7c3aed; }
+        .kpi-label { font-size: 10px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--g400); margin-bottom: 8px; }
+        .kpi-value { font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 900; color: var(--black); letter-spacing: -0.03em; line-height: 1; margin-bottom: 5px; }
+        .kpi-sub { font-size: 12px; color: var(--g400); font-weight: 500; }
+        .kpi-up { color: #16a34a; font-weight: 700; }
+        .kpi-down { color: #dc2626; font-weight: 700; }
+
+        /* ── backward compat aliases ── */
+        .mgr-btn { display:inline-flex; align-items:center; gap:7px; height:34px; padding:0 14px; font-size:12px; font-weight:700; border:1px solid var(--g200); background:white; color:var(--g800); cursor:pointer; transition:all 0.15s; border-radius:2px; text-decoration:none; }
+        .mgr-btn svg { width:13px; height:13px; stroke:currentColor; stroke-width:2.5; fill:none; }
+        .mgr-btn-primary { background:var(--blue); color:white; border-color:var(--blue); }
+        .mgr-btn-primary:hover { background:var(--blue-dk); color:white; }
+        .mgr-btn-secondary { background:white; color:#333; border:1px solid var(--g200); }
+        .mgr-btn-secondary:hover { background:var(--g100); }
+        .mgr-btn-danger { color:#dc2626; border-color:#fecaca; background:white; }
+        .mgr-btn-danger:hover { background:#fef2f2; }
+        .mgr-card { background:white; border:1px solid var(--g200); margin-bottom:16px; }
+        .mgr-card-header { padding:13px 18px; border-bottom:1px solid var(--g200); display:flex; align-items:center; justify-content:space-between; }
+        .mgr-card-title { font-size:11px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; color:var(--g600); }
+        .mgr-table-container { overflow-x:auto; }
+        .mgr-table { width:100%; border-collapse:collapse; }
+        .mgr-table th { text-align:left; padding:9px 14px; font-size:10px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; color:var(--g400); background:var(--g50); border-bottom:1px solid var(--g200); }
+        .mgr-table td { padding:13px 14px; font-size:13px; border-bottom:1px solid var(--g100); vertical-align:middle; }
+        .mgr-table tr:last-child td { border-bottom:none; }
+        .mgr-table tbody tr:hover td { background:var(--g50); }
+        .mgr-alert { padding:12px 16px; font-size:13px; font-weight:600; margin-bottom:12px; border-left:3px solid; }
+        .mgr-alert-success { background:#f0fdf4; color:#166534; border-color:#16a34a; }
+        .mgr-alert-error   { background:#fef2f2; color:#991b1b; border-color:#dc2626; }
+        .mgr-topbar-title  { font-family:'Outfit',sans-serif; font-size:18px; font-weight:800; }
+        .stat-num { font-family:'Outfit',sans-serif; font-weight:900; letter-spacing:-0.02em; }
+    </style>
+</head>
+<body>
+
+<!-- ══ TOP BAR ══ -->
+<header class="adm-topbar">
+    <div class="adm-brand">
+        NEXUS
+        <span class="adm-brand-badge">Admin</span>
+    </div>
+    <div class="adm-topbar-right">
+        <a href="{% url 'home' %}" class="adm-topbar-link">
+            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+            Saytga o'tish
+        </a>
+        <div class="adm-user-pill">
+            <div class="adm-user-av">{{ request.user.first_name|first|default:request.user.username|first|upper }}</div>
+            <span class="adm-user-nm">{{ request.user.first_name|default:request.user.username }}</span>
+        </div>
+    </div>
+</header>
+
+<!-- ══ SUB NAV (Horizontal) ══ -->
+<nav class="adm-subnav">
+    <a href="{% url 'manager_dashboard' %}" class="adm-nav-item {% block nav_dashboard %}{% endblock %}">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+    </a>
+    <a href="{% url 'manager_order_list' %}" class="adm-nav-item {% block nav_orders %}{% endblock %}">
+        <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        Buyurtmalar
+        {% if pending_count > 0 %}<span class="adm-nav-badge">{{ pending_count }}</span>{% endif %}
+    </a>
+    <a href="{% url 'manager_product_list' %}" class="adm-nav-item {% block nav_products %}{% endblock %}">
+        <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        Mahsulotlar
+    </a>
+    <a href="{% url 'manager_inventory_list' %}" class="adm-nav-item {% block nav_inventory %}{% endblock %}">
+        <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        Zaxira
+    </a>
+    <a href="{% url 'manager_user_list' %}" class="adm-nav-item {% block nav_users %}{% endblock %}">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        Foydalanuvchilar
+    </a>
+    <a href="{% url 'manager_category_list' %}" class="adm-nav-item {% block nav_categories %}{% endblock %}">
+        <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/></svg>
+        Kategoriyalar
+    </a>
+
+
+    <div class="adm-subnav-right">
+        <span style="font-size:11px; color:#aaa; padding:0 16px;">{% block topbar_actions %}{% endblock %}</span>
+    </div>
+</nav>
+
+<!-- ══ PAGE WRAPPER ══ -->
+<div class="adm-wrapper">
+    <main class="adm-main">
+        <!-- Page Header -->
+        <div class="adm-page-header">
+            <div class="adm-page-title">{% block page_title %}Dashboard{% endblock %}</div>
+            <div class="adm-topbar-actions">{% block page_actions %}{% endblock %}</div>
+        </div>
+
+        <!-- Alerts -->
+        <div style="padding: 0 24px;">
+            {% if messages %}
+            {% for message in messages %}
+            <div style="margin-top:14px;" class="adm-alert adm-alert-{% if message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}success{% endif %}">{{ message }}</div>
+            {% endfor %}
+            {% endif %}
+        </div>
+
+        <!-- Content -->
+        <div class="adm-content">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+</div>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,190 @@
+{% extends 'manager/base_manager.html' %}
+
+{% block page_title %}Do'kon Sozlamalari{% endblock %}
+{% block nav_storefront %}active{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px;">
+    
+
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <!-- SITE SETTINGS -->
+        <div style="margin-bottom: 24px;">
+            <h2 style="font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 800; color: var(--nexus-dark); margin-bottom: 8px;">Asosiy Sozlamalar</h2>
+            <p style="font-size: 14px; color: var(--text-muted); font-weight: 500;">Do'kon nomi, kontaktlar va ijtimoiy tarmoqlar.</p>
+        </div>
+
+        <div class="mgr-card" style="padding: 32px; margin-bottom: 40px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                <div class="form-group">
+                    <label class="form-label">Sayt Nomi</label>
+                    {{ site_form.site_name }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Domen / URL</label>
+                    {{ site_form.site_domain }}
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                <div class="form-group">
+                    <label class="form-label">Kontakt Telefon</label>
+                    {{ site_form.contact_phone }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Kontakt Email</label>
+                    {{ site_form.contact_email }}
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 24px;">
+                <label class="form-label">Asosiy Manzil</label>
+                {{ site_form.address }}
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                <div class="form-group">
+                    <label class="form-label">Instagram</label>
+                    {{ site_form.social_instagram }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Telegram</label>
+                    {{ site_form.social_telegram }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Chek uchun izoh (Footer)</label>
+                {{ site_form.receipt_footer }}
+            </div>
+        </div>
+
+        <!-- HERO SECTION -->
+        <div style="margin-bottom: 24px;">
+            <h2 style="font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 800; color: var(--nexus-dark); margin-bottom: 8px;">Asosiy Banner (Hero)</h2>
+            <p style="font-size: 14px; color: var(--text-muted); font-weight: 500;">Bosh sahifadagi asosiy marketing bloki.</p>
+        </div>
+
+        <div class="mgr-card" style="padding: 32px; margin-bottom: 40px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                <div class="form-group">
+                    <label class="form-label">Kichik Sarlavha</label>
+                    {{ hero_form.eyebrow_text }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Tugma Matni</label>
+                    {{ hero_form.cta_primary_text }}
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+                <div class="form-group">
+                    <label class="form-label">Sarlavha 1</label>
+                    {{ hero_form.title_line1 }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Sarlavha 2</label>
+                    {{ hero_form.title_line2 }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Sarlavha 3</label>
+                    {{ hero_form.title_line3 }}
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 24px;">
+                <label class="form-label">Qisqa Tavsif</label>
+                {{ hero_form.subtitle }}
+            </div>
+
+            <div style="padding-top: 24px; border-top: 1px solid var(--glass-border);">
+                <label class="form-label">Asosiy Rasm</label>
+                {% if hero.hero_image %}
+                <div style="margin-bottom: 16px; border-radius: 16px; overflow: hidden; border: 1px solid var(--glass-border); width: fit-content; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+                    <img src="{{ hero.hero_image.url }}" alt="Hero" style="height: 140px; width: auto; display: block;">
+                </div>
+                {% endif %}
+                {{ hero_form.hero_image }}
+            </div>
+
+            <div style="margin-top: 24px; display: flex; align-items: center; gap: 12px;">
+                {{ hero_form.is_active }}
+                <label for="{{ hero_form.is_active.id_for_label }}" style="font-size: 14px; font-weight: 700; color: var(--nexus-dark); cursor: pointer;">Bosh sahifada faollashtirish</label>
+            </div>
+        </div>
+
+        <div style="padding-bottom: 100px;">
+            <button type="submit" class="mgr-btn mgr-btn-primary" style="padding: 16px 40px; font-size: 16px;">
+                Sozlamalarni Saqlash
+            </button>
+        </div>
+    </form>
+</div>
+
+<style>
+.nexus-tab {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 18px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: all 0.3s;
+}
+.nexus-tab:hover { background: rgba(0,0,0,0.05); color: var(--nexus-dark); }
+.nexus-tab.active { background: white; color: var(--nexus-blue); box-shadow: 0 4px 12px rgba(0, 108, 225, 0.08); }
+
+.form-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+}
+
+input[type="text"], input[type="email"], textarea, select {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+    background: rgba(0, 0, 0, 0.02);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--nexus-dark);
+    outline: none;
+    transition: all 0.3s;
+}
+
+input[type="text"]:focus, input[type="email"]:focus, textarea:focus {
+    background: white;
+    border-color: var(--nexus-blue);
+    box-shadow: 0 0 0 4px rgba(0, 108, 225, 0.1);
+}
+
+textarea { min-height: 100px; resize: vertical; }
+
+input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--nexus-blue);
+    cursor: pointer;
+}
+</style>
+
+{% include 'manager/includes/image_cropper.html' %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof ImageUploader !== 'undefined') {
+        new ImageUploader('id_hero-hero_image', null);
+    }
+});
+</script>
+{% endblock %}

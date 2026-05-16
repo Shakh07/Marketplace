@@ -1,0 +1,106 @@
+{% extends 'manager/base_manager.html' %}
+{% load humanize %}
+{% block title %}Ombor Zaxirasi — NEXUS Boshqaruv{% endblock %}
+{% block nav_inventory %}active{% endblock %}
+{% block page_title %}Ombor Zaxirasi{% endblock %}
+
+{% block page_actions %}
+<div class="mgr-btn mgr-btn-secondary">
+    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+    Zaxira Hisoboti
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="mgr-card" style="background: transparent; box-shadow: none; border: none; overflow: visible;">
+    
+    <!-- Filter Card -->
+    <div class="mgr-card" style="margin-bottom: 24px;">
+        <form method="GET" class="mgr-search-bar" id="inventory-search-form" style="padding: 16px 20px; display: flex; gap: 16px; align-items: center; border-bottom: none;">
+            <div style="flex: 1; position: relative;">
+                <svg viewBox="0 0 24 24" width="18" height="18" stroke="var(--text-muted)" stroke-width="2.5" fill="none" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); pointer-events: none;">
+                    <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" name="q" id="search-q" class="mgr-search-input" placeholder="Mahsulot nomi bo'yicha qidirish..." value="{{ query }}" style="width: 100%; border: 1px solid var(--glass-border); border-radius: 14px; padding: 12px 16px 12px 48px; font-size: 14px; background: rgba(0,0,0,0.02); outline: none; transition: all 0.3s; font-family: inherit; font-weight: 500;">
+            </div>
+            
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Holat:</label>
+                <select name="status" id="search-status" style="border: 1px solid var(--glass-border); border-radius: 10px; padding: 8px 12px; font-size: 13px; font-weight: 600; background: white; outline: none; cursor: pointer;">
+                    <option value="all">Barchasi</option>
+                    <option value="low" {% if current_status == 'low' %}selected{% endif %}>Kam qolgan</option>
+                    <option value="out" {% if current_status == 'out' %}selected{% endif %}>Tugagan</option>
+                </select>
+            </div>
+        </form>
+    </div>
+
+    <!-- Table Card -->
+    <div class="mgr-card">
+        <div class="mgr-table-container">
+            <table class="mgr-table">
+                <thead>
+                    <tr>
+                        <th>Mahsulot</th>
+                        <th>Variant</th>
+                        <th>Ombor</th>
+                        <th>Mavjud</th>
+                        <th>Sotilgan</th>
+                        <th>Holat</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="inventory-table-body" style="transition: opacity 0.3s;">
+                    {% include 'manager/inventory_list_partial.html' %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+.mgr-search-input:focus {
+    background: white;
+    border-color: var(--nexus-blue);
+    box-shadow: 0 0 0 4px rgba(0, 108, 225, 0.1);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('search-q');
+    const statusSelect = document.getElementById('search-status');
+    const tbody = document.getElementById('inventory-table-body');
+    let debounceTimer;
+
+    const performSearch = () => {
+        const url = new URL(window.location.href);
+        url.searchParams.set('q', searchInput.value);
+        url.searchParams.set('status', statusSelect.value);
+
+        tbody.style.opacity = '0.4';
+
+        fetch(url, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(res => res.json())
+        .then(data => {
+            tbody.innerHTML = data.html;
+            tbody.style.opacity = '1';
+            window.history.pushState(null, '', url);
+        })
+        .catch(err => {
+            console.error(err);
+            tbody.style.opacity = '1';
+        });
+    };
+
+    searchInput.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(performSearch, 500);
+    });
+
+    statusSelect.addEventListener('change', performSearch);
+});
+</script>
+{% endblock %}

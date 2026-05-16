@@ -1,0 +1,41 @@
+{% for u in users %}
+<tr style="transition: all 0.3s;">
+    <td>
+        <div style="display: flex; align-items: center; gap: 14px;">
+            <div style="width: 40px; height: 40px; border-radius: 12px; background: var(--nexus-dark); color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-family: 'Outfit';">
+                {{ u.first_name|first|default:u.username|first|upper }}
+            </div>
+            <div>
+                <div style="font-weight: 700; color: var(--nexus-dark);">{{ u.get_full_name|default:u.username }}</div>
+                <div style="font-size: 12px; color: var(--text-muted); font-weight: 600;">{{ u.email|default:"Email yo'q" }}</div>
+            </div>
+        </div>
+    </td>
+    <td style="font-weight: 700; color: var(--nexus-dark);">{{ u.phone|default:"—" }}</td>
+    <td>
+        <span class="pill pill-{{ u.user_type }}">
+            {{ u.get_user_type_display|default:"Mijoz" }}
+        </span>
+    </td>
+    <td style="font-weight: 700; color: var(--nexus-blue);">
+        {{ u.orders.count }} ta
+    </td>
+    <td>
+        {% if u.is_active %}
+            <span class="pill pill-paid">Faol</span>
+        {% else %}
+            <span class="pill pill-pending">Bloklangan</span>
+        {% endif %}
+    </td>
+    <td style="color: var(--text-muted); font-size: 13px; font-weight: 600;">{{ u.date_joined|date:"d.m.Y" }}</td>
+    <td style="text-align: right;">
+        <a href="{% url 'manager_user_detail' u.id %}" class="mgr-btn mgr-btn-secondary" style="padding: 8px 16px; font-size: 12px;">Batafsil</a>
+    </td>
+</tr>
+{% empty %}
+<tr>
+    <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 80px 40px;">
+        <div style="font-weight: 700;">Foydalanuvchilar topilmadi</div>
+    </td>
+</tr>
+{% endfor %}

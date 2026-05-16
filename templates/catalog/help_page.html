@@ -1,0 +1,327 @@
+{% extends 'base.html' %}
+{% block title %}Yordam va qo'llanmalar — NEXUS{% endblock %}
+
+{% block content %}
+<div class="nexus-help-page">
+    
+    <!-- Hero Header -->
+    <div class="help-hero">
+        <a href="javascript:history.back()" class="help-back-btn">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            <span>Orqaga qaytish</span>
+        </a>
+        <h1 class="help-hero-title">Qanday yordam bera olamiz?</h1>
+        <p class="help-hero-subtitle">NEXUS platformasidan foydalanish bo'yicha ko'rsatmalarni ko'rib chiqing.</p>
+    </div>
+
+    <!-- Bento Grid Menu -->
+    <div class="help-bento-grid">
+        
+        <!-- Category 1: Account -->
+        <div class="bento-card bento-large">
+            <div class="bento-icon account-icon">
+                <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            </div>
+            <h3 class="bento-title">Profil va Sozlamalar</h3>
+            <p class="bento-desc">Hisobingiz ma'lumotlarini o'zgartirish, xavfsizlik va manzillarni boshqarish.</p>
+            <ul class="bento-list">
+                <li>
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    Profil ma'lumotlarini (ism, telefon) tahrirlash
+                </li>
+                <li>
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    Xarita orqali yangi manzil qo'shish
+                </li>
+                <li>
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    So'nggi xaridlar tarixini ko'rish
+                </li>
+            </ul>
+        </div>
+
+        <!-- Category 2: Shopping -->
+        <div class="bento-card bento-small">
+            <div class="bento-icon shopping-icon">
+                <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+            </div>
+            <h3 class="bento-title">Xarid jarayoni</h3>
+            <p class="bento-desc">Katalogni o'rganing va kerakli mahsulotlarni topib, savatga yig'ing.</p>
+            <ul class="bento-list">
+                <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg> Qidiruv tizimidan foydalanish</li>
+                <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg> Mahsulot sifatini tekshirish</li>
+            </ul>
+        </div>
+
+        <!-- Category 3: Orders -->
+        <div class="bento-card bento-small">
+            <div class="bento-icon cart-icon">
+                <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+            </div>
+            <h3 class="bento-title">Buyurtma va To'lov</h3>
+            <p class="bento-desc">Savatga o'tib rasmiylashtirish va onlayn ro'yxatdan o'tish.</p>
+            <ul class="bento-list">
+                <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg> To'lov usullari (Karta / Naqd)</li>
+                <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg> Yetkazib berish holati</li>
+            </ul>
+        </div>
+
+        <!-- Category 4: Warranty & Returning -->
+        <div class="bento-card bento-small" id="warranty">
+            <div class="bento-icon" style="background:#fff3cd; color:#856404;">
+                <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            </div>
+            <h3 class="bento-title">Kafolat va Qaytarish</h3>
+            <p class="bento-desc">Tovarni qaytarish siyosati, yuridik huquqlar va Apple kafolati darsligi.</p>
+            <ul class="bento-list">
+                <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg> Barcha qurilmalarga 1 yil kafolat</li>
+                <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg> 14 kun ichida tovarni qaytarish</li>
+            </ul>
+        </div>
+
+        <!-- Category 5: About Company -->
+        <div class="bento-card bento-small" id="about">
+            <div class="bento-icon" style="background:#e0f2fe; color:#0284c7;">
+                <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
+            </div>
+            <h3 class="bento-title">Kompaniya</h3>
+            <p class="bento-desc">Biz haqimizda ma'lumotlar, do'konlarimiz manzillari va karyera.</p>
+            <ul class="bento-list">
+                <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg> Vakansiyalar va karyera</li>
+                <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg> Yashash joyingizdagi filiallar</li>
+            </ul>
+        </div>
+
+    </div>
+
+    <!-- Contact Banner -->
+    <div class="contact-banner">
+        <div class="contact-banner-content">
+            <h2 class="contact-banner-title">Yechim topmadingizmi?</h2>
+            <p class="contact-banner-subtitle">Saytda ro'yxatdan o'tish yoki xarid qilish bo'yicha baribir savollaringiz qoldimi? Biz sizga jon deb yordam beramiz.</p>
+        </div>
+        <div class="contact-banner-actions">
+            <a href="tel:{{ site_settings.contact_phone|default:'+998712000000'|cut:' ' }}" class="btn btn-white">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                {{ site_settings.contact_phone|default:"+998 71 200 00 00" }}
+            </a>
+            <a href="mailto:{{ site_settings.contact_email|default:'support@nexus.uz' }}" class="btn btn-outline-white">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                {{ site_settings.contact_email|default:"support@nexus.uz" }}
+            </a>
+        </div>
+    </div>
+
+</div>
+
+<style>
+/* Page Layout */
+.nexus-help-page {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 60px 24px 100px;
+}
+
+/* Hero Section */
+.help-hero {
+    text-align: center;
+    margin-bottom: 60px;
+}
+.help-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,0,0,0.04);
+    padding: 8px 16px 8px 12px;
+    border-radius: 999px;
+    color: #1d1d1f;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    margin-bottom: 32px;
+    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.help-back-btn:hover {
+    background: rgba(0,0,0,0.08);
+    transform: scale(1.02);
+}
+.help-hero-title {
+    font-size: 48px;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    color: #1d1d1f;
+    line-height: 1.1;
+    margin: 0 0 16px 0;
+}
+.help-hero-subtitle {
+    font-size: 20px;
+    color: #86868b;
+    font-weight: 400;
+    line-height: 1.4;
+    max-width: 500px;
+    margin: 0 auto;
+    letter-spacing: -0.01em;
+}
+
+/* Bento Grid */
+.help-bento-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: minmax(auto, 1fr);
+    gap: 24px;
+    margin-bottom: 60px;
+}
+.bento-card {
+    background: white;
+    border: 1px solid rgba(0,0,0,0.04);
+    border-radius: 32px;
+    padding: 40px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.03);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+}
+.bento-card:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+}
+.bento-large {
+    grid-column: span 2;
+}
+
+/* Card Elements */
+.bento-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+}
+.account-icon { background: #e8f2ff; color: #0071e3; }
+.shopping-icon { background: #fdf2f8; color: #db2777; }
+.cart-icon { background: #f0fdf4; color: #16a34a; }
+
+.bento-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1d1d1f;
+    letter-spacing: -0.02em;
+    margin: 0 0 12px 0;
+}
+.bento-desc {
+    font-size: 16px;
+    color: #6e6e73;
+    line-height: 1.5;
+    margin: 0 0 24px 0;
+    max-width: 80%;
+}
+.bento-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.bento-list li {
+    font-size: 15px;
+    color: #1d1d1f;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.bento-list li svg {
+    color: #0071e3;
+    background: rgba(0,113,227,0.1);
+    border-radius: 50%;
+    /* padding: 2px; */ /* Too small if padded */
+}
+
+/* Contact Banner */
+.contact-banner {
+    background: #1d1d1f;
+    border-radius: 32px;
+    padding: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+    color: white;
+}
+.contact-banner-content {
+    flex: 1;
+}
+.contact-banner-title {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin: 0 0 12px 0;
+    color: white;
+}
+.contact-banner-subtitle {
+    font-size: 16px;
+    color: #a1a1a6;
+    line-height: 1.5;
+    max-width: 440px;
+    margin: 0;
+}
+.contact-banner-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 220px;
+}
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 16px 24px;
+    border-radius: 16px;
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.btn-white {
+    background: white;
+    color: #1d1d1f;
+}
+.btn-white:hover {
+    background: #f5f5f7;
+    transform: scale(1.02);
+}
+.btn-outline-white {
+    background: transparent;
+    color: white;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+.btn-outline-white:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .help-hero-title { font-size: 36px; }
+    .help-bento-grid { grid-template-columns: 1fr; }
+    .bento-large { grid-column: span 1; }
+    .contact-banner {
+        flex-direction: column;
+        text-align: center;
+        padding: 40px 32px;
+    }
+    .contact-banner-subtitle {
+        margin: 0 auto;
+    }
+    .contact-banner-actions {
+        width: 100%;
+        min-width: auto;
+    }
+    .btn { width: 100%; }
+}
+</style>
+{% endblock %}

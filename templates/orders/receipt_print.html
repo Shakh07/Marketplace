@@ -1,0 +1,347 @@
+{% load humanize %}<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chek — #{{ order.order_number }} | {{ site_settings.site_name }}</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+    background: #f5f5f7;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    color: #1d1d1f;
+  }
+
+  /* Top action bar — only shown on screen, hidden when printing */
+  .action-bar {
+    width: 100%;
+    max-width: 520px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+
+  .action-bar a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: #86868b;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .action-bar a:hover { color: #1d1d1f; }
+
+  .btn-download {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #0071e3;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 11px 22px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .btn-download:hover { opacity: 0.88; }
+
+  /* Receipt card */
+  .receipt {
+    width: 100%;
+    max-width: 520px;
+    background: white;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 8px 48px rgba(0,0,0,0.10);
+  }
+
+  /* Brand header */
+  .receipt-header {
+    background: #1d1d1f;
+    padding: 36px 40px 30px;
+    text-align: center;
+    color: white;
+  }
+  .brand-name {
+    font-size: 34px;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    margin-bottom: 4px;
+  }
+  .brand-sub {
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 0.02em;
+  }
+
+  /* Status badge */
+  .status-row {
+    text-align: center;
+    padding: 20px 40px;
+    border-bottom: 1px dashed rgba(0,0,0,0.10);
+  }
+  .status-badge {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 5px 14px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .status-pending    { background: #fff7ed; color: #c2410c; }
+  .status-confirmed  { background: #f0fdf4; color: #15803d; }
+  .status-processing { background: #eff6ff; color: #1d4ed8; }
+  .status-shipped    { background: #f5f3ff; color: #7c3aed; }
+  .status-delivered  { background: #f0fdf4; color: #15803d; }
+  .status-cancelled  { background: #fef2f2; color: #dc2626; }
+
+  /* Body sections */
+  .receipt-body { padding: 28px 40px; }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #86868b;
+    margin-bottom: 14px;
+  }
+
+  .meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+  }
+  .meta-row:last-child { border-bottom: none; }
+  .meta-row .label { color: #86868b; }
+  .meta-row .value { font-weight: 600; color: #1d1d1f; }
+
+  .divider {
+    height: 1px;
+    background: repeating-linear-gradient(
+      90deg, rgba(0,0,0,0.10) 0, rgba(0,0,0,0.10) 6px, transparent 6px, transparent 12px
+    );
+    margin: 24px 0;
+  }
+
+  /* Items */
+  .item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+  }
+  .item-row:last-child { border-bottom: none; }
+  .item-name { font-size: 14px; font-weight: 500; margin-bottom: 3px; }
+  .item-meta { font-size: 12px; color: #86868b; }
+  .item-price { font-size: 14px; font-weight: 700; white-space: nowrap; padding-left: 16px; }
+
+  /* Totals */
+  .totals-section { margin-top: 8px; }
+  .total-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    padding: 6px 0;
+    color: #6e6e73;
+  }
+  .total-final {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0 0;
+    margin-top: 12px;
+    border-top: 2px solid #1d1d1f;
+  }
+  .total-final .label { font-size: 16px; font-weight: 700; color: #1d1d1f; }
+  .total-final .amount { font-size: 22px; font-weight: 800; color: #1d1d1f; }
+
+  /* Address */
+  .address-box {
+    background: #f5f5f7;
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin-top: 6px;
+    font-size: 13px;
+    line-height: 1.7;
+    color: #3d3d3f;
+  }
+  .address-box strong { color: #1d1d1f; display: block; margin-bottom: 2px; }
+
+  /* Footer */
+  .receipt-footer {
+    text-align: center;
+    padding: 24px 40px 32px;
+    border-top: 1px dashed rgba(0,0,0,0.10);
+  }
+  .footer-thanks {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1d1d1f;
+    margin-bottom: 8px;
+  }
+  .footer-contact {
+    font-size: 12px;
+    color: #86868b;
+    line-height: 1.7;
+  }
+  .footer-meta {
+    font-size: 10px;
+    color: #c7c7cc;
+    margin-top: 12px;
+  }
+
+  /* ──── Print Styles ──── */
+  @media print {
+    body {
+      background: white;
+      padding: 0;
+      display: block;
+    }
+    .action-bar { display: none !important; }
+    .receipt {
+      max-width: 100%;
+      border-radius: 0;
+      box-shadow: none;
+    }
+    @page {
+      margin: 6mm;
+      size: A4;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- Action Bar (screen only) -->
+<div class="action-bar">
+  <a href="{% url 'order_detail' order.id %}">
+    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    Buyurtmaga qaytish
+  </a>
+  <button class="btn-download" onclick="window.print()">
+    <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+      <polyline points="7 10 12 15 17 10"></polyline>
+      <line x1="12" y1="15" x2="12" y2="3"></line>
+    </svg>
+    Chekni Yuklab Olish (PDF)
+  </button>
+</div>
+
+<!-- Receipt Card -->
+<div class="receipt">
+
+  <!-- Brand -->
+  <div class="receipt-header">
+    <div class="brand-name">{{ site_settings.site_name }}</div>
+    <div class="brand-sub">{{ site_settings.site_domain }} &bull; {{ site_settings.contact_email }}</div>
+  </div>
+
+  <!-- Status -->
+  <div class="status-row">
+    <span class="status-badge status-{{ order.order_status }}">{{ order.get_order_status_display }}</span>
+  </div>
+
+  <div class="receipt-body">
+
+    <!-- Order Meta -->
+    <div class="section-label">Buyurtma ma'lumotlari</div>
+    <div class="meta-row">
+      <span class="label">Buyurtma raqami</span>
+      <span class="value">#{{ order.order_number }}</span>
+    </div>
+    <div class="meta-row">
+      <span class="label">Sana va vaqt</span>
+      <span class="value">{{ order.created_at|date:"d.m.Y, H:i" }}</span>
+    </div>
+    <div class="meta-row">
+      <span class="label">To'lov usuli</span>
+      <span class="value">{{ order.payment_method|default:"Naqd pul" }}</span>
+    </div>
+    <div class="meta-row">
+      <span class="label">To'lov holati</span>
+      <span class="value">{{ order.get_payment_status_display }}</span>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Items -->
+    <div class="section-label">Mahsulotlar</div>
+    {% for item in order.items.all %}
+    <div class="item-row">
+      <div>
+        <div class="item-name">{% if item.product %}{{ item.product.product_name }}{% else %}Mahsulot{% endif %}</div>
+        <div class="item-meta">{{ item.quantity }} dona &times; {{ item.unit_price|floatformat:0|intcomma }} so'm{% if item.variant %} &bull; {{ item.variant.variant_name }}{% endif %}</div>
+      </div>
+      <div class="item-price">{{ item.subtotal|floatformat:0|intcomma }} so'm</div>
+    </div>
+    {% endfor %}
+
+    <!-- Totals -->
+    <div class="totals-section">
+      <div class="total-row">
+        <span>Mahsulotlar jami</span>
+        <span>{{ order.subtotal|floatformat:0|intcomma }} so'm</span>
+      </div>
+      <div class="total-row">
+        <span>Yetkazib berish</span>
+        <span style="color:#15803d; font-weight:500;">Bepul</span>
+      </div>
+      <div class="total-final">
+        <span class="label">Umumiy to'lov</span>
+        <span class="amount">{{ order.total_amount|floatformat:0|intcomma }} so'm</span>
+      </div>
+    </div>
+
+    {% if order.delivery_street %}
+    <div class="divider"></div>
+    <div class="section-label">Yetkazish manzili</div>
+    <div class="address-box">
+      <strong>{{ order.delivery_full_name }}</strong>
+      {{ order.delivery_street }}, {{ order.delivery_city }}{% if order.delivery_region %}, {{ order.delivery_region }}{% endif %}
+      {% if order.delivery_phone %}<br>{{ order.delivery_phone }}{% endif %}
+      {% if order.delivery_notes %}<br><em>{{ order.delivery_notes }}</em>{% endif %}
+    </div>
+    {% endif %}
+
+  </div>
+
+  <!-- Footer -->
+  <div class="receipt-footer">
+    <div class="footer-thanks">Xarid uchun rahmat! 🙏</div>
+    <div class="footer-contact">
+      {{ site_settings.receipt_footer }}<br>
+      {{ site_settings.contact_email }}{% if site_settings.contact_phone %} &bull; {{ site_settings.contact_phone }}{% endif %}
+    </div>
+    <div class="footer-meta">
+      {{ site_settings.address }}<br>
+      {{ order.created_at|date:"d.m.Y" }} &bull; #{{ order.order_number }}
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Auto-open print dialog when page loads (for download flow)
+  {% if request.GET.auto_print %}
+  window.addEventListener('load', () => setTimeout(() => window.print(), 400));
+  {% endif %}
+</script>
+</body>
+</html>

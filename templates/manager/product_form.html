@@ -1,0 +1,975 @@
+{% extends 'manager/base_manager.html' %}
+{% load l10n %}
+{% block title %}{% if is_edit %}{{ form.product_name.value }}{% else %}Yangi Mahsulot{% endif %} — NEXUS Manager{% endblock %}
+{% block nav_products %}active{% endblock %}
+{% block page_title %}{% if is_edit %}Mahsulotni tahrirlash <span style="font-weight:400; color:#86868b; font-size:15px;">— {{ form.product_name.value }}</span>{% else %}Yangi Mahsulot yaratish{% endif %}{% endblock %}
+
+{% block content %}
+<a href="{% url 'manager_product_list' %}" class="mgr-back-link">
+    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+    Ortga qaytish
+</a>
+
+<form method="POST" enctype="multipart/form-data" class="mgr-product-form" id="productForm">
+    {% csrf_token %}
+    
+    <div class="mgr-form-grid">
+        <!-- Main Column -->
+        <div class="mgr-form-main">
+            <!-- Basic Info -->
+            <div class="mgr-card mgr-form-card">
+                <div class="mgr-card-header">
+                    <div class="mgr-card-title">Asosiy Ma'lumotlar</div>
+                </div>
+                <div class="mgr-card-body">
+                    <div class="mgr-form-group">
+                        <label for="id_product_name">Mahsulot Nomi <span style="color:#ff3b30">*</span></label>
+                        <input type="text" name="product_name" id="id_product_name" class="mgr-input" value="{{ form.product_name.value|default:'' }}" required placeholder="MacBook Pro 14 M3">
+                    </div>
+                    
+                    <div class="mgr-form-group">
+                        <label for="id_slug">Mahsulot ID (Slug)</label>
+                        <input type="text" name="slug" id="id_slug" class="mgr-input" value="{{ form.slug.value|default:'' }}" placeholder="Avtomatik yasaladi, yoki o'zingiz yozing (macbook-pro-14-m3)">
+                        <div class="mgr-form-help">Sayt manzilida qanday ko'rinishi. O'zi avtomatik yasaladi, teginmasligingiz ham mumkin.</div>
+                    </div>
+                    
+                    <!-- ── Narx Kalkulyatori ── -->
+                    <div style="background: linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%); border: 1.5px solid rgba(0,102,255,0.12); border-radius: 18px; padding: 20px; margin-top: 8px;">
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:18px;">
+                            <div style="width:32px; height:32px; background:#0066ff; border-radius:10px; display:flex; align-items:center; justify-content:center;">
+                                <svg viewBox="0 0 24 24" width="16" height="16" stroke="white" stroke-width="2.5" fill="none"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                            </div>
+                            <span style="font-size:14px; font-weight:800; color:#1a1a2e; letter-spacing:-0.02em;">Narx Kalkulyatori</span>
+                        </div>
+
+                        <!-- Qator 1: Sotib olingan narxi -->
+                        <div style="margin-bottom:14px;">
+                            <label for="id_cost_price" style="font-size:12px; font-weight:700; color:#555; text-transform:uppercase; letter-spacing:0.05em; display:block; margin-bottom:6px;">
+                                🛒 Sotib olingan narxi (Tan narxi)
+                            </label>
+                            <div style="position:relative;">
+                                <input type="number" name="cost_price" id="id_cost_price" class="mgr-input" 
+                                       value="{{ form.cost_price.value|floatformat:"0u"|default:'' }}"
+                                       placeholder="Masalan: 10,000,000"
+                                       style="padding-right:60px; border-color:rgba(234,88,12,0.3); background:rgba(234,88,12,0.03);"
+                                       oninput="calcPrice()">
+                                <span style="position:absolute; right:14px; top:50%; transform:translateY(-50%); font-size:12px; font-weight:700; color:#ea580c; pointer-events:none;">so'm</span>
+                            </div>
+                        </div>
+
+                        <!-- Qator 2: Ustama foizi -->
+                        <div style="margin-bottom:14px;">
+                            <label style="font-size:12px; font-weight:700; color:#555; text-transform:uppercase; letter-spacing:0.05em; display:block; margin-bottom:6px;">
+                                📈 Ustama (%)
+                            </label>
+                            <div style="display:flex; gap:8px; align-items:center;">
+                                <div style="position:relative; flex:1;">
+                                    <input type="number" id="id_markup_pct" min="0" max="1000" step="0.1"
+                                           class="mgr-input"
+                                           placeholder="Masalan: 25"
+                                           style="padding-right:40px; border-color:rgba(0,102,255,0.2); background:rgba(0,102,255,0.03);"
+                                           oninput="calcFromMarkup()">
+                                    <span style="position:absolute; right:14px; top:50%; transform:translateY(-50%); font-size:13px; font-weight:800; color:#0066ff; pointer-events:none;">%</span>
+                                </div>
+                                <!-- Tez tanlash tugmalari -->
+                                <div style="display:flex; gap:4px; flex-shrink:0;">
+                                    <button type="button" onclick="setMarkup(10)" class="markup-btn">+10%</button>
+                                    <button type="button" onclick="setMarkup(15)" class="markup-btn">+15%</button>
+                                    <button type="button" onclick="setMarkup(20)" class="markup-btn">+20%</button>
+                                    <button type="button" onclick="setMarkup(25)" class="markup-btn">+25%</button>
+                                    <button type="button" onclick="setMarkup(30)" class="markup-btn">+30%</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Qator 3: Sotish narxi -->
+                        <div style="margin-bottom:14px;">
+                            <label for="id_base_price" style="font-size:12px; font-weight:700; color:#555; text-transform:uppercase; letter-spacing:0.05em; display:block; margin-bottom:6px;">
+                                🏷️ Sotish narxi (Mijozga ko'rsatiladi) <span style="color:#ff3b30">*</span>
+                            </label>
+                            <div style="position:relative;">
+                                <input type="number" name="base_price" id="id_base_price" class="mgr-input" 
+                                       value="{{ form.base_price.value|floatformat:"0u"|default:'' }}" required
+                                       placeholder="Avtomatik hisoblanadi yoki o'zingiz kiriting"
+                                       style="padding-right:60px; border-color:rgba(0,102,255,0.3); background:rgba(0,102,255,0.03); font-weight:700;"
+                                       oninput="calcFromSelling()">
+                                <span style="position:absolute; right:14px; top:50%; transform:translateY(-50%); font-size:12px; font-weight:700; color:#0066ff; pointer-events:none;">so'm</span>
+                            </div>
+                        </div>
+
+                        <!-- Foyda ko'rsatkichi -->
+                        <div id="profit-preview" style="background:white; border-radius:14px; padding:14px 16px; border:1.5px solid #e8f5e9; display:flex; justify-content:space-between; align-items:center; transition:0.3s;">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span id="profit-icon" style="font-size:18px;">💰</span>
+                                <div>
+                                    <div style="font-size:11px; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:0.05em;">Foyda (1 dona)</div>
+                                    <div id="profit-value" style="font-size:20px; font-weight:900; color:#16a34a; font-family:'Outfit',sans-serif; letter-spacing:-0.02em;">—</div>
+                                </div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div style="font-size:11px; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:0.05em;">Marja</div>
+                                <div id="margin-value" style="font-size:20px; font-weight:900; color:#16a34a; font-family:'Outfit',sans-serif;">—</div>
+                            </div>
+                        </div>
+
+                        <!-- Chegirmali narx -->
+                        <div style="margin-top:14px; padding-top:14px; border-top:1px dashed rgba(0,0,0,0.08);">
+                            <label for="id_sale_price" style="font-size:12px; font-weight:700; color:#555; text-transform:uppercase; letter-spacing:0.05em; display:block; margin-bottom:6px;">
+                                🔖 Chegirmali narx (ixtiyoriy)
+                            </label>
+                            <div style="position:relative;">
+                                <input type="number" name="sale_price" id="id_sale_price" class="mgr-input"
+                                       value="{{ form.sale_price.value|floatformat:"0u"|default:'' }}"
+                                       placeholder="Agar chegirma bo'lsa kiriting"
+                                       style="padding-right:60px;">
+                                <span style="position:absolute; right:14px; top:50%; transform:translateY(-50%); font-size:12px; font-weight:700; color:#888; pointer-events:none;">so'm</span>
+                            </div>
+                            <div class="mgr-form-help">Chegirma bo'lsa — bu narx xaridorga ko'rsatiladi, asosiy narx chizib qo'yiladi.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="mgr-card mgr-form-card">
+                <div class="mgr-card-header">
+                    <div class="mgr-card-title">Batafsil Ta'rif</div>
+                </div>
+                <div class="mgr-card-body">
+                    <div class="mgr-form-group" style="margin: 0;">
+                        <textarea name="description" id="id_description" class="mgr-input" rows="8" placeholder="Mahsulot haqida to'liq va jozibador ma'lumot... HTML teglar ishlatsa bo'ladi.">{{ form.description.value|default:'' }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inventory Details -->
+            <div class="mgr-card mgr-form-card">
+                <div class="mgr-card-header">
+                    <div class="mgr-card-title">Inventar & O'lchamlar</div>
+                </div>
+                <div class="mgr-card-body">
+                    <div class="mgr-form-group">
+                        <label for="id_initial_stock" style="color: #0071e3;">Asosiy Ombordagi Qoldiq (dona)</label>
+                        <input type="number" name="initial_stock" id="id_initial_stock" class="mgr-input" value="{{ form.initial_stock.value|default:'0' }}" style="border-color: rgba(0,113,227,0.3); background: rgba(0,113,227,0.02); font-weight: 600; color: #0071e3;">
+                        <div class="mgr-form-help">Umumiy bazadagi soni. (Agar variantlar kiritsangiz, ulardagi sonlarning hammasi hisobga olinadi)</div>
+                    </div>
+                
+                    <div class="mgr-form-row">
+                        <div class="mgr-form-group">
+                            <label for="id_sku">SKU (Taqqoslash kodi)</label>
+                            <input type="text" name="sku" id="id_sku" class="mgr-input" value="{{ form.sku.value|default:'' }}" placeholder="MBP-14-M3-8-256">
+                        </div>
+                        <div class="mgr-form-group">
+                            <label for="id_barcode">Shtrixkod (Barcode)</label>
+                            <input type="text" name="barcode" id="id_barcode" class="mgr-input" value="{{ form.barcode.value|default:'' }}" placeholder="O'qitish uchun 13 raqamli shtrixkod">
+                        </div>
+                    </div>
+                    
+                    <div class="mgr-form-row">
+                        <div class="mgr-form-group">
+                            <label for="id_weight">Og'irlik (kg)</label>
+                            <input type="number" step="0.01" name="weight" id="id_weight" class="mgr-input" value="{{ form.weight.value|default:'' }}" placeholder="1.55">
+                        </div>
+                        <div class="mgr-form-group">
+                            <label for="id_dimensions">O'lchamlar</label>
+                            <input type="text" name="dimensions" id="id_dimensions" class="mgr-input" value="{{ form.dimensions.value|default:'' }}" placeholder="30x21x1.5 sm">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Variants Setup -->
+            <div class="mgr-card mgr-form-card">
+                <div class="mgr-card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="mgr-card-title">Mahsulot Variatsiyalari (Rang, Xotira, va hk.)</div>
+                    <button type="button" class="mgr-btn-icon" id="add-variant-btn" title="Variant qo'shish" style="background: rgba(10,132,255,0.1); color: #0a84ff; border-radius: 50%; width: 28px; height: 28px; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center;">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    </button>
+                </div>
+                <div class="mgr-card-body">
+                    <div id="variants-container" style="display: flex; flex-direction: column; gap: 16px;">
+                        {% if variants %}
+                            {% for v in variants %}
+                               <div class="variant-row" style="display: flex; flex-direction: column; gap: 12px; padding: 20px; background: #fafafc; border: 1px solid rgba(0,0,0,0.05); border-radius: 16px; position:relative;">
+                                   <input type="hidden" name="variant_id[]" value="{{ v.id }}">
+                                   
+                                   <div style="display: flex; gap: 12px; align-items: flex-start;">
+                                       <div style="flex: 2;">
+                                           <label class="mgr-label" style="font-size:12px;">Nom (Masalan: Space Gray, 256GB)</label>
+                                           <input type="text" name="variant_name[]" class="mgr-input" value="{{ v.variant_name }}" required>
+                                       </div>
+                                       <div style="flex: 1;">
+                                           <label class="mgr-label" style="font-size:12px;">Narx ustamasi</label>
+                                           <input type="number" name="variant_price[]" class="mgr-input" value="{{ v.price_adjustment|floatformat:"0u" }}" placeholder="0">
+                                       </div>
+                                       <div style="flex: 1;">
+                                           <label class="mgr-label" style="font-size:12px;">Qoldiq (dona)</label>
+                                           <input type="number" name="variant_stock[]" class="mgr-input" value="{{ v.stock_quantity|default:0 }}">
+                                       </div>
+                                        <button type="button" class="variant-remove-btn-existing" style="margin-top:24px; width:44px; height:44px; border-radius:12px; border:none; background:rgba(255,59,48,0.1); color:#ff3b30; cursor:pointer; display:flex; align-items:center; justify-content:center;">&times;</button>
+                                   </div>
+
+                                   <!-- Variant Specific Gallery -->
+                                   <div class="variant-gallery-section" style="margin-top: 8px;">
+                                       <label class="mgr-label" style="font-size:11px; opacity: 0.7;">Variant rasmlari</label>
+                                       <div class="variant-gallery-previews" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px;">
+                                           {% for v_img in v.variant_images.all %}
+                                               <div style="position: relative; width: 50px; height: 50px; border-radius: 8px; overflow: hidden; border: 1px solid rgba(0,0,0,0.05);">
+                                                   <img src="{{ v_img.image_url.url }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                                   <label style="position: absolute; top: 2px; right: 2px; background: rgba(255,59,48,0.8); color: white; width: 14px; height: 14px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 10px;">
+                                                       <input type="checkbox" name="delete_variant_image[]" value="{{ v_img.id }}" style="display:none;" onchange="this.parentElement.parentElement.style.opacity = this.checked ? '0.3' : '1';">
+                                                       &times;
+                                                   </label>
+                                               </div>
+                                           {% endfor %}
+                                           <div class="new-variant-previews" style="display: flex; gap: 8px;"></div>
+                                       </div>
+                                       <label class="mgr-btn" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; font-size: 12px; background: #f0f0f2; cursor: pointer; border-radius: 8px;">
+                                           <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                                           Rasm qo'shish
+                                           <input type="file" name="variant_images_{{ forloop.counter0 }}" multiple accept="image/*" style="display:none;" onchange="handleVariantImageChange(this)">
+                                       </label>
+                                   </div>
+                               </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="mgr-form-help" id="no-variants-help" style="text-align:center; padding: 16px 0;">Hali hech qanday variant qo'shilmagan. Yuqoridagi + tugmasini bosing.</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Sidebar Column -->
+        <div class="mgr-form-side">
+            
+            <!-- Actions -->
+            <div class="mgr-card mgr-form-card">
+                <div class="mgr-card-header">
+                    <div class="mgr-card-title">Nashr Qilish</div>
+                </div>
+                <div class="mgr-card-body">
+                    <div class="mgr-form-group">
+                        <label for="id_product_status">Holat</label>
+                        <select name="product_status" id="id_product_status" class="mgr-input mgr-select">
+                            <option value="draft" {% if form.product_status.value == 'draft' %}selected{% endif %}>Qoralama (Draft)</option>
+                            <option value="active" {% if form.product_status.value == 'active' %}selected{% endif %}>Faol (Ko'rinadi)</option>
+                            <option value="out_of_stock" {% if form.product_status.value == 'out_of_stock' %}selected{% endif %}>Tugagan</option>
+                            <option value="discontinued" {% if form.product_status.value == 'discontinued' %}selected{% endif %}>Sotuvdan olingan</option>
+                        </select>
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px; margin-top: 24px;">
+                        <button type="submit" class="mgr-btn mgr-btn-primary" style="flex:1; justify-content: center; padding: 12px; font-size: 14px; font-weight: 600;">Saqlash</button>
+                    </div>
+                    {% if form.errors %}
+                        <div style="margin-top: 16px; color: #ff3b30; font-size: 13px; font-weight: 500; background: rgba(255,59,48,0.05); padding: 12px; border-radius: 10px;">
+                            Iltimos, ba'zi xatolarni to'g'rilang.
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <div style="margin-top: 4px;">• {{ field.label }}: {{ error }}</div>
+                                {% endfor %}
+                            {% endfor %}
+                            {% for error in form.non_field_errors %}
+                                <div style="margin-top: 4px;">• {{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Image Gallery -->
+            <div class="mgr-card mgr-form-card">
+                <div class="mgr-card-header">
+                    <div class="mgr-card-title">Rasmlar Galereyasi</div>
+                </div>
+                <div class="mgr-card-body">
+                    <div class="mgr-form-group" style="margin: 0;">
+                        <label class="mgr-label">Asosiy Rasm (Muqova)</label>
+                        {% if primary_image %}
+                             <div style="margin-top: 8px; margin-bottom: 16px; width: 80px; height: 80px; border-radius: 12px; background: #f5f5f7; border: 1px solid rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                                 <img src="{{ primary_image.image_url.url }}" alt="img" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                             </div>
+                        {% endif %}
+                        <div class="custom-file-wrap">
+                             <input type="file" name="image" id="id_image" accept="image/*" class="mgr-file-input" style="display:block;">
+                        </div>
+                    </div>
+                    
+                    <hr style="border:none; border-top: 1px solid rgba(0,0,0,0.05); margin: 24px 0;">
+                    
+                    <div class="mgr-form-group" style="margin: 0;">
+                        <label class="mgr-label">Qo'shimcha Rasmlar</label>
+                        <div class="gallery-container" style="background: rgba(0,0,0,0.02); border-radius: 16px; padding: 20px; border: 1px dashed rgba(0,0,0,0.1);">
+                            
+                            <!-- Existing Gallery -->
+                            {% if gallery_images %}
+                            <div class="gallery-preview-layer" style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px;">
+                                {% for g_img in gallery_images %}
+                                   <div class="gallery-item-existing" style="position: relative; width: 80px; height: 80px; border-radius: 12px; background: #ffffff; border: 1px solid rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: center; overflow: hidden; transition: 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                                       <img src="{{ g_img.image_url.url }}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                                       <label class="gallery-del-btn" style="position: absolute; top: 4px; right: 4px; background: rgba(255,59,48,0.9); color: white; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; font-weight: bold; line-height: 1;" title="O'chirish">
+                                           <input type="checkbox" name="delete_gallery_images" value="{{ g_img.id }}" style="display:none;" onchange="this.parentElement.parentElement.style.opacity = this.checked ? '0.3' : '1';">
+                                           &times;
+                                       </label>
+                                   </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            
+                            <!-- New Previews -->
+                            <div id="general-gallery-previews" style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;"></div>
+
+                            <div class="custom-file-wrap">
+                                 <label class="mgr-btn" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 60px; border-radius: 12px; background: #ffffff; border: 1px solid rgba(0,0,0,0.1); cursor: pointer; font-weight: 500; transition: 0.2s;">
+                                     <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                                     Galereyaga rasmlar tanlash
+                                     <input type="file" name="gallery_images" id="id_gallery_images" accept="image/*" multiple class="mgr-file-input" style="display:none;" onchange="handleGeneralGalleryChange(this)">
+                                 </label>
+                            </div>
+                            <div class="mgr-form-help" style="margin-top: 12px; text-align: center;">Tugmani bosib rasmlarni tanlang (JPG, PNG).</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categorisation -->
+            <div class="mgr-card mgr-form-card">
+                <div class="mgr-card-header">
+                    <div class="mgr-card-title">Turkum & Brend</div>
+                </div>
+                <div class="mgr-card-body">
+                    <div class="mgr-form-group">
+                        <label for="id_category">Toifa</label>
+                        <select name="category" id="id_category" class="mgr-input mgr-select">
+                            <option value="">-- Toifa tanlang --</option>
+                            {% for cat in form.fields.category.queryset %}
+                                <option value="{{ cat.id }}" {% if form.category.value|stringformat:"s" == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.category_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mgr-form-group" style="margin-bottom: 0;">
+                        <label for="id_brand">Brend</label>
+                        <select name="brand" id="id_brand" class="mgr-input mgr-select">
+                            <option value="">-- Brend tanlang --</option>
+                            {% for br_nd in form.fields.brand.queryset %}
+                                <option value="{{ br_nd.id }}" {% if form.brand.value|stringformat:"s" == br_nd.id|stringformat:"s" %}selected{% endif %}>{{ br_nd.brand_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</form>
+
+<style>
+/* Product Form Layout */
+.mgr-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 24px;
+    margin-bottom: 40px;
+}
+.mgr-form-main {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+.mgr-form-side {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* Cards & Containers */
+.mgr-form-card {
+    position: relative;
+    z-index: 1;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02), 0 8px 24px rgba(0,0,0,0.03);
+    border: 1px solid rgba(0,0,0,0.06);
+    overflow: visible !important;
+    animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Staggered animation for cards */
+.mgr-form-main > div:nth-child(1) { animation-delay: 0.1s; }
+.mgr-form-main > div:nth-child(2) { animation-delay: 0.2s; }
+.mgr-form-main > div:nth-child(3) { animation-delay: 0.3s; }
+.mgr-form-main > div:nth-child(4) { animation-delay: 0.4s; }
+.mgr-form-side > div:nth-child(1) { animation-delay: 0.15s; }
+.mgr-form-side > div:nth-child(2) { animation-delay: 0.25s; }
+.mgr-form-side > div:nth-child(3) { animation-delay: 0.35s; }
+
+.mgr-form-card .mgr-card-header {
+    padding: 18px 24px;
+    background: rgba(250, 250, 252, 0.8);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    border-radius: 20px 20px 0 0;
+}
+.mgr-form-card .mgr-card-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1d1d1f;
+    letter-spacing: -0.02em;
+}
+.mgr-form-card .mgr-card-body {
+    padding: 24px;
+}
+
+/* Form Elements */
+.mgr-form-group {
+    margin-bottom: 20px;
+}
+.mgr-form-row {
+    display: flex;
+    gap: 16px;
+}
+.mgr-form-row > .mgr-form-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+.mgr-form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #48484a;
+    margin-bottom: 8px;
+    margin-left: 2px;
+}
+.mgr-input {
+    width: 100%;
+    border: 1.5px solid rgba(0,0,0,0.08);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 14px;
+    color: #1d1d1f;
+    background: #fcfcfd;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: inherit;
+    outline: none;
+}
+.mgr-input:focus {
+    background: #ffffff;
+    border-color: #0071e3;
+    box-shadow: 0 0 0 4px rgba(0,113,227,0.08);
+    transform: translateY(-1px);
+}
+textarea.mgr-input {
+    min-height: 120px;
+    resize: vertical;
+    line-height: 1.6;
+}
+.mgr-select {
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2386868b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 16px;
+    padding-right: 40px;
+}
+.mgr-form-help {
+    font-size: 12.5px;
+    line-height: 1.4;
+    color: #8c8c92;
+    margin-top: 6px;
+}
+
+/* Custom Select Implementation */
+.custom-select-container { position: relative; width: 100%; }
+.custom-select-btn {
+    display: flex; align-items: center; justify-content: space-between; width: 100%;
+    border: 1.5px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 12px 16px;
+    font-size: 14px; background: #fcfcfd; cursor: pointer; color: #1d1d1f; transition: all 0.25s; text-align: left;
+}
+.custom-select-btn:focus, .custom-select-btn.open {
+    background: #ffffff; border-color: #0071e3; box-shadow: 0 0 0 4px rgba(0,113,227,0.08); transform: translateY(-1px);
+}
+.custom-select-menu {
+    display: none; position: absolute; top: calc(100% + 6px); left: 0; width: 100%; max-height: 250px; overflow-y: auto;
+    background: white; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.05);
+    z-index: 100; padding: 6px; flex-direction: column; opacity: 0; transform: translateY(-5px); transition: all 0.2s;
+}
+.custom-select-item {
+    display: block; width: 100%; text-align: left; padding: 8px 12px; font-size: 13px; border: none;
+    background: transparent; color: #1d1d1f; border-radius: 6px; cursor: pointer; transition: background 0.1s; margin-bottom: 2px;
+}
+.custom-select-item:hover { background: rgba(0,0,0,0.04); }
+.custom-select-item.active { background: #0071e3; color: white; font-weight: 500; }
+.custom-select-item.active:hover { background: #0077ed; }
+
+/* Image box */
+.img-preview-box {
+    width: 100%;
+    aspect-ratio: 1/1;
+    background: #f5f5f7;
+    border: 2.5px dashed rgba(0,0,0,0.1);
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    margin-bottom: 12px;
+}
+.img-preview-box:hover {
+    border-color: #0071e3;
+    background: rgba(0,113,227,0.02);
+}
+.mgr-file-input {
+    display: none;
+}
+
+/* Specific UI Enhancements */
+.variant-row {
+    background: #fbfbfd !important;
+    border: 1px solid rgba(0,0,0,0.06) !important;
+    transition: all 0.3s ease;
+}
+.variant-row:hover {
+    background: #ffffff !important;
+    border-color: rgba(0,113,227,0.2) !important;
+    transform: scale(1.005);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+}
+.mgr-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    font-weight: 600;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+.mgr-btn-primary {
+    background: #0071e3;
+    color: #ffffff;
+    border: none;
+}
+.mgr-btn-primary:hover {
+    background: #0077ed;
+    box-shadow: 0 4px 12px rgba(0,113,227,0.3);
+    transform: translateY(-1px);
+}
+.gallery-del-btn:hover {
+    transform: scale(1.15);
+    background: #ff3b30 !important;
+}
+
+@keyframes rotate {
+    100% { transform: rotate(360deg); }
+}
+
+/* Markup buttons */
+.markup-btn {
+    height: 44px;
+    padding: 0 10px;
+    border-radius: 10px;
+    border: 1.5px solid rgba(0,102,255,0.2);
+    background: white;
+    font-size: 12px;
+    font-weight: 700;
+    color: #0066ff;
+    cursor: pointer;
+    transition: 0.15s;
+    white-space: nowrap;
+    font-family: inherit;
+}
+.markup-btn:hover, .markup-btn.active {
+    background: #0066ff;
+    color: white;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .mgr-form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // Custom Select Initializer
+    document.querySelectorAll('.mgr-select').forEach(select => {
+        select.style.display = 'none';
+
+        const container = document.createElement('div');
+        container.className = 'custom-select-container';
+
+        const activeOption = select.options[select.selectedIndex] || select.options[0];
+        
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'custom-select-btn';
+        
+        const span = document.createElement('span');
+        span.textContent = activeOption ? activeOption.text : '-- Tanlang --';
+        
+        const icon = document.createElement('div');
+        icon.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" stroke="#86868b" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+        icon.style.display = 'flex';
+        
+        btn.appendChild(span);
+        btn.appendChild(icon);
+        container.appendChild(btn);
+
+        const menu = document.createElement('div');
+        menu.className = 'custom-select-menu';
+
+        Array.from(select.options).forEach(opt => {
+            const item = document.createElement('button');
+            item.type = 'button';
+            item.className = 'custom-select-item';
+            if (opt.selected) item.classList.add('active');
+            item.textContent = opt.text;
+            
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                select.value = opt.value;
+                // Dispatch change to trigger any existing event listeners
+                select.dispatchEvent(new Event('change'));
+                
+                menu.querySelectorAll('.custom-select-item').forEach(el => el.classList.remove('active'));
+                item.classList.add('active');
+                span.textContent = opt.text;
+                closeMenu();
+            });
+            
+            menu.appendChild(item);
+        });
+
+        container.appendChild(menu);
+        select.parentNode.insertBefore(container, select.nextSibling);
+
+        const parentCard = container.closest('.mgr-form-card');
+
+        function openMenu() {
+            document.querySelectorAll('.custom-select-menu').forEach(m => {
+                if (m !== menu) { m.style.display = 'none'; m.style.opacity = '0'; m.previousElementSibling.classList.remove('open'); }
+            });
+            menu.style.display = 'flex';
+            btn.classList.add('open');
+            container.style.zIndex = '999';
+            if (parentCard) parentCard.style.zIndex = '999';
+            setTimeout(() => {
+                menu.style.opacity = '1';
+                menu.style.transform = 'translateY(0)';
+            }, 10);
+        }
+
+        function closeMenu() {
+            menu.style.opacity = '0';
+            menu.style.transform = 'translateY(-5px)';
+            btn.classList.remove('open');
+            setTimeout(() => { 
+                menu.style.display = 'none'; 
+                container.style.zIndex = '';
+                if (parentCard) parentCard.style.zIndex = '1';
+            }, 200);
+        }
+
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (menu.style.display === 'flex') closeMenu();
+            else openMenu();
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!container.contains(e.target)) closeMenu();
+        });
+    });
+
+    // ── Narx Kalkulyatori ──
+    function fmt(n) {
+        return Math.round(n).toLocaleString('uz-UZ') + " so'm";
+    }
+
+    function updateProfitUI() {
+        const cost   = parseFloat(document.getElementById('id_cost_price')?.value) || 0;
+        const sell   = parseFloat(document.getElementById('id_base_price')?.value) || 0;
+        const box    = document.getElementById('profit-preview');
+        const pVal   = document.getElementById('profit-value');
+        const mVal   = document.getElementById('margin-value');
+        const pIcon  = document.getElementById('profit-icon');
+
+        if (!box || !pVal || !mVal) return;
+
+        if (cost > 0 && sell > 0) {
+            const profit = sell - cost;
+            const margin = ((profit / sell) * 100).toFixed(1);
+
+            pVal.textContent = (profit >= 0 ? '+' : '') + fmt(profit);
+            mVal.textContent = margin + '%';
+
+            if (profit >= 0) {
+                pVal.style.color = '#16a34a';
+                mVal.style.color = '#16a34a';
+                box.style.borderColor = '#bbf7d0';
+                box.style.background = '#f0fdf4';
+                pIcon.textContent = profit === 0 ? '⚖️' : '💰';
+            } else {
+                pVal.style.color = '#dc2626';
+                mVal.style.color = '#dc2626';
+                box.style.borderColor = '#fecaca';
+                box.style.background = '#fff5f5';
+                pIcon.textContent = '⚠️';
+            }
+        } else {
+            pVal.textContent = '—';
+            mVal.textContent = '—';
+            pVal.style.color = '#888';
+            mVal.style.color = '#888';
+            box.style.borderColor = '#e8f5e9';
+            box.style.background = 'white';
+            pIcon.textContent = '💰';
+        }
+    }
+
+    // markup ga qarab sotish narxini hisoblash
+    function calcFromMarkup() {
+        const cost   = parseFloat(document.getElementById('id_cost_price')?.value) || 0;
+        const markup = parseFloat(document.getElementById('id_markup_pct')?.value) || 0;
+        if (cost > 0 && markup > 0) {
+            const selling = Math.round(cost * (1 + markup / 100));
+            document.getElementById('id_base_price').value = selling;
+        }
+        updateProfitUI();
+    }
+
+    // sotib olingan narxi o'zgarganda
+    function calcPrice() {
+        const cost   = parseFloat(document.getElementById('id_cost_price')?.value) || 0;
+        const markup = parseFloat(document.getElementById('id_markup_pct')?.value) || 0;
+        if (cost > 0 && markup > 0) {
+            const selling = Math.round(cost * (1 + markup / 100));
+            document.getElementById('id_base_price').value = selling;
+        }
+        updateProfitUI();
+    }
+
+    // sotish narxi qo'lda kiritilganda — markup ni hisoblaydi
+    function calcFromSelling() {
+        const cost = parseFloat(document.getElementById('id_cost_price')?.value) || 0;
+        const sell = parseFloat(document.getElementById('id_base_price')?.value) || 0;
+        const mkEl = document.getElementById('id_markup_pct');
+        if (cost > 0 && sell > 0 && mkEl) {
+            const mk = ((sell - cost) / cost * 100).toFixed(1);
+            mkEl.value = mk;
+        }
+        updateProfitUI();
+    }
+
+    // Tez tanlash tugmasi bosilganda
+    function setMarkup(pct) {
+        const mkEl = document.getElementById('id_markup_pct');
+        if (mkEl) mkEl.value = pct;
+        // Active holat
+        document.querySelectorAll('.markup-btn').forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+        calcFromMarkup();
+    }
+
+    // Sahifa yuklanganda mavjud narxlardan markup hisoblash
+    updateProfitUI();
+
+    // 1. Slug auto-generator
+    const titleInput = document.getElementById('id_product_name');
+    const slugInput = document.getElementById('id_slug');
+    const isEdit = {{ is_edit|yesno:"true,false" }};
+    
+    // Only auto-generate if we are not editing
+    if (!isEdit && titleInput && slugInput) {
+        titleInput.addEventListener('input', function() {
+            // Very simple english-based slug generation
+            let str = this.value;
+            str = str.replace(/^\s+|\s+$/g, ''); // trim
+            str = str.toLowerCase();
+            
+            const from = "àáäâèéëêìíïîòóöôùúüûñç·/_,:;'\"";
+            const to   = "aaaaeeeeiiiioooouuuunc-------";
+            for (let i=0, l=from.length ; i<l ; i++) {
+                str = str.replace(new RegExp(from.charAt(i), 'g'), to.charAt(i));
+            }
+            
+            str = str.replace(/[^a-z0-9 -]/g, '') // remove invalid chars
+                .replace(/\s+/g, '-') // collapse whitespace and replace by -
+                .replace(/-+/g, '-'); // collapse dashes
+            
+            slugInput.value = str;
+        });
+    }
+
+    // Submit state logic
+    const mainForm = document.getElementById('productForm');
+    if (mainForm) {
+        mainForm.addEventListener('submit', function() {
+            const btn = this.querySelector('button[type="submit"]');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = `
+                    <svg class="spinner" viewBox="0 0 50 50" style="width:18px; height:18px; margin-right:8px; animation: rotate 2s linear infinite;">
+                        <circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="5" stroke-dasharray="90, 150" stroke-linecap="round"></circle>
+                    </svg>
+                    Saqlanmoqda...
+                `;
+            }
+        });
+    }
+
+    // Variant logic
+    const addVariantBtn = document.getElementById('add-variant-btn');
+    const variantsContainer = document.getElementById('variants-container');
+    const helpMsg = document.getElementById('no-variants-help');
+
+    function reindexVariants() {
+        const rows = variantsContainer.querySelectorAll('.variant-row');
+        rows.forEach((row, index) => {
+            const fileInput = row.querySelector('input[type="file"]');
+            if (fileInput) {
+                fileInput.name = `variant_images_${index}`;
+            }
+        });
+        if (rows.length === 0 && helpMsg) {
+            helpMsg.style.display = 'block';
+        }
+    }
+
+    // Initial reindex to handle existing rows
+    reindexVariants();
+
+    if (addVariantBtn) {
+        addVariantBtn.addEventListener('click', () => {
+            if (helpMsg) helpMsg.style.display = 'none';
+
+            const row = document.createElement('div');
+            row.className = 'variant-row';
+            row.style.cssText = 'display: flex; flex-direction: column; gap: 12px; padding: 20px; background: #fafafc; border: 1px solid rgba(0,0,0,0.05); border-radius: 16px; position:relative; opacity:0; transform:translateY(10px); transition: 0.3s ease;';
+
+            row.innerHTML = `
+                <input type="hidden" name="variant_id[]" value="new">
+                <div style="display: flex; gap: 12px; align-items: flex-start;">
+                    <div style="flex: 2;">
+                        <label class="mgr-label" style="font-size:12px;">Nom (M-n: Space Gray, 256GB)</label>
+                        <input type="text" name="variant_name[]" class="mgr-input" required>
+                    </div>
+                    <div style="flex: 1;">
+                        <label class="mgr-label" style="font-size:12px;">Narx ustamasi</label>
+                        <input type="number" name="variant_price[]" class="mgr-input" value="0" placeholder="0">
+                    </div>
+                    <div style="flex: 1;">
+                        <label class="mgr-label" style="font-size:12px;">Qoldiq (dona)</label>
+                        <input type="number" name="variant_stock[]" class="mgr-input" value="0">
+                    </div>
+                    <button type="button" class="variant-remove-btn" style="margin-top:24px; width:44px; height:44px; border-radius:12px; border:none; background:rgba(255,59,48,0.1); color:#ff3b30; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:bold;">&times;</button>
+                </div>
+                <div class="variant-gallery-section" style="margin-top: 8px;">
+                    <label class="mgr-label" style="font-size:11px; opacity: 0.7;">Variant rasmlari</label>
+                    <div class="variant-gallery-previews" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px;">
+                        <div class="new-variant-previews" style="display: flex; gap: 8px;"></div>
+                    </div>
+                    <label class="mgr-btn" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; font-size: 12px; background: #f0f0f2; cursor: pointer; border-radius: 8px;">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                        Rasm qo'shish
+                        <input type="file" name="variant_images_TEMP" multiple accept="image/*" style="display:none;" onchange="handleVariantImageChange(this)">
+                    </label>
+                </div>
+            `;
+            variantsContainer.appendChild(row);
+            
+            // Trigger animation
+            setTimeout(() => {
+                row.style.opacity = '1';
+                row.style.transform = 'translateY(0)';
+            }, 10);
+
+            reindexVariants();
+            
+            // Hook up delete button
+            row.querySelector('.variant-remove-btn').addEventListener('click', () => {
+                row.style.opacity = '0';
+                row.style.transform = 'translateY(10px)';
+                setTimeout(() => {
+                    row.remove();
+                    reindexVariants();
+                }, 300);
+            });
+        });
+    }
+
+    // Hook up existing delete buttons
+    document.querySelectorAll('.variant-remove-btn-existing').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const row = this.closest('.variant-row');
+            row.style.opacity = '0';
+            row.style.transform = 'translateY(10px)';
+            setTimeout(() => {
+                row.remove();
+                reindexVariants();
+            }, 300);
+        });
+    });
+});
+
+function handleGeneralGalleryChange(input) {
+    const previewContainer = document.getElementById('general-gallery-previews');
+    previewContainer.innerHTML = '';
+    
+    if (input.files) {
+        Array.from(input.files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imgDiv = document.createElement('div');
+                imgDiv.style.cssText = 'width: 80px; height: 80px; border-radius: 12px; overflow: hidden; border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 2px 8px rgba(0,0,0,0.05);';
+                imgDiv.innerHTML = `<img src="${e.target.result}" style="width: 100%; height: 100%; object-fit: cover;">`;
+                previewContainer.appendChild(imgDiv);
+            }
+            reader.readAsDataURL(file);
+        });
+    }
+}
+
+function handleVariantImageChange(input) {
+    const previewContainer = input.closest('.variant-gallery-section').querySelector('.new-variant-previews');
+    previewContainer.innerHTML = '';
+    
+    if (input.files) {
+        Array.from(input.files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imgDiv = document.createElement('div');
+                imgDiv.style.cssText = 'width: 50px; height: 50px; border-radius: 8px; overflow: hidden; border: 1px solid rgba(0,0,0,0.1);';
+                imgDiv.innerHTML = `<img src="${e.target.result}" style="width: 100%; height: 100%; object-fit: cover;">`;
+                previewContainer.appendChild(imgDiv);
+            }
+            reader.readAsDataURL(file);
+        });
+    }
+}
+</script>
+
+{% include 'manager/includes/image_cropper.html' %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Erkin o'lchamdagi qirqish uchun NaN beramiz
+    new ImageUploader('id_image', NaN);
+});
+</script>
+{% endblock %}

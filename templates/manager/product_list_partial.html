@@ -1,0 +1,59 @@
+{% load humanize %}
+{% for product in products %}
+<tr style="transition: all 0.3s;">
+    <td>
+        <div style="display: flex; align-items: center; gap: 14px;">
+            <div style="width: 48px; height: 48px; border-radius: 10px; overflow: hidden; background: #f5f5f7; border: 1px solid var(--glass-border); flex-shrink: 0;">
+                {% if product.main_image %}
+                    <img src="{{ product.main_image.url }}" alt="{{ product.product_name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                {% else %}
+                    <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 10px;">IMG</div>
+                {% endif %}
+            </div>
+            <div>
+                <a href="{% url 'manager_product_edit' product.id %}" style="font-weight: 700; color: var(--nexus-dark); text-decoration: none; font-size: 14px;">{{ product.product_name }}</a>
+                <div style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-top: 2px;">{{ product.brand.brand_name }}</div>
+            </div>
+        </div>
+    </td>
+    <td style="color: var(--text-muted); font-weight: 600; font-size: 13px;">{{ product.category.category_name }}</td>
+    <td style="color: var(--text-muted); font-weight: 600; font-size: 13px;">{{ product.brand.brand_name }}</td>
+    <td>
+        <div style="font-family: 'Outfit', sans-serif; font-weight: 800; color: var(--nexus-dark); font-size: 16px;">{{ product.base_price|floatformat:0|intcomma }}</div>
+        <div style="font-size: 10px; color: var(--text-muted); font-weight: 700;">SO'M</div>
+    </td>
+    <td>
+        {% if product.sale_price %}
+            <div style="color: #ff3b30; font-weight: 700; font-size: 13px;">{{ product.sale_price|floatformat:0|intcomma }}</div>
+        {% else %}
+            <span style="color: var(--text-muted); opacity: 0.4;">—</span>
+        {% endif %}
+    </td>
+    <td>
+        {% if product.product_status == 'active' %}
+            <span class="pill pill-paid">Faol</span>
+        {% else %}
+            <span class="pill pill-pending">{{ product.get_product_status_display }}</span>
+        {% endif %}
+    </td>
+    <td style="text-align: right;">
+        <div style="display: flex; gap: 8px; justify-content: flex-end;">
+            <a href="{% url 'manager_product_edit' product.id %}" class="mgr-btn mgr-btn-secondary" style="padding: 8px; border-radius: 10px;">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+            </a>
+            <a href="{% url 'product_detail' product.slug %}" target="_blank" class="mgr-btn mgr-btn-secondary" style="padding: 8px; border-radius: 10px;">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+            </a>
+        </div>
+    </td>
+</tr>
+{% empty %}
+<tr>
+    <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 80px 40px;">
+        <div style="margin-bottom: 12px; opacity: 0.2;">
+            <svg viewBox="0 0 24 24" width="48" height="48" stroke="currentColor" stroke-width="1.5" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line></svg>
+        </div>
+        <div style="font-weight: 700; color: var(--nexus-dark);">Mahsulotlar topilmadi</div>
+    </td>
+</tr>
+{% endfor %}

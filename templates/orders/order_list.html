@@ -1,0 +1,321 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Buyurtmalar — NEXUS{% endblock %}
+
+{% block content %}
+<div class="nexus-orders-page">
+
+    <div class="orders-page-header">
+        <div>
+            <h1>Buyurtmalar tarixi</h1>
+            <p>Barcha xaridlaringiz bir joyda.</p>
+        </div>
+        <a href="{% url 'product_list' %}" class="btn" style="background:#f5f5f7; color:#000; border-radius:999px; padding:10px 20px; font-size:14px; font-weight:500; text-decoration:none;">
+            Xaridni davom ettirish
+        </a>
+    </div>
+
+    {% if orders %}
+    <div class="orders-list">
+        {% for order in orders %}
+        <a href="{% url 'order_detail' order.id %}" class="order-card-link">
+            <div class="order-card">
+                
+                <!-- Left: Thumbnails -->
+                <div class="order-card-gallery">
+                    {% if order.items.count == 1 %}
+                        {% with item=order.items.first %}
+                        <div class="thumb-single">
+                            {% if item.product and item.product.images.first %}
+                                <img src="{{ item.product.images.first.image_url.url }}" alt="{{ item.product.product_name }}">
+                            {% else %}
+                                <span>✦</span>
+                            {% endif %}
+                        </div>
+                        {% endwith %}
+                    {% else %}
+                        <div class="thumb-grid">
+                            {% for item in order.items.all|slice:":4" %}
+                                <div class="thumb-mini">
+                                    {% if item.product and item.product.images.first %}
+                                        <img src="{{ item.product.images.first.image_url.url }}" alt="Item">
+                                    {% else %}
+                                        <span></span>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                            {% if order.items.count > 4 %}
+                            <!-- if more than 4, the 4th is overlaid with +X -->
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Middle: Information -->
+                <div class="order-card-info">
+                    <h3>
+                        {% if order.items.count == 1 %}
+                            {% if order.items.first.product %}{{ order.items.first.product.product_name }}{% else %}Mahsulot mavjud emas{% endif %}
+                        {% else %}
+                            {% if order.items.first.product %}{{ order.items.first.product.product_name }}{% endif %} va yana {{ order.items.count|add:"-1" }} ta mahsulot
+                        {% endif %}
+                    </h3>
+                    <p class="order-meta">
+                        Buyurtma #{{ order.order_number }} &nbsp;•&nbsp; {{ order.created_at|date:"d M, Y" }}
+                    </p>
+                    <div class="order-tags">
+                        <span class="order-status-pill order-status-{{ order.order_status }}">{{ order.get_order_status_display }}</span>
+                        <span class="order-payment-status payment-{{ order.payment_status }}">{{ order.get_payment_status_display }}</span>
+                    </div>
+                </div>
+
+                <!-- Right: Price & Action -->
+                <div class="order-card-action">
+                    <div class="order-total">{{ order.total_amount|floatformat:0|intcomma }} so'm</div>
+                    <div class="order-action-link">
+                        Batafsil
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </div>
+                </div>
+
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="orders-empty-state">
+        <div class="orders-empty-icon">
+            <svg viewBox="0 0 24 24" width="48" height="48" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+        </div>
+        <h2>Hali buyurtma bermagansiz</h2>
+        <p>Barcha xaridlaringiz shu yerda ko'rinadi. Yangi qurilmalarni kashf eting.</p>
+        <a href="{% url 'product_list' %}" class="btn action-btn">
+            Xaridni boshlash
+        </a>
+    </div>
+    {% endif %}
+
+</div>
+
+<style>
+.nexus-orders-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 60px 24px 100px;
+}
+
+.orders-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 48px;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.orders-page-header h1 {
+    font-size: 40px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+    color: #1d1d1f;
+}
+
+.orders-page-header p {
+    color: #86868b;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.orders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.order-card-link {
+    text-decoration: none;
+    display: block;
+    border-radius: 24px;
+    outline: none;
+}
+
+.order-card {
+    display: flex;
+    align-items: center;
+    background: white;
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 24px;
+    padding: 24px;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.order-card-link:hover .order-card {
+    border-color: rgba(0,0,0,0.12);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.06);
+    transform: scale(1.01);
+}
+
+/* Flex children */
+.order-card-gallery {
+    flex-shrink: 0;
+    width: 90px;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.thumb-single {
+    width: 80px; height: 80px;
+    background: #f5f5f7;
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(0,0,0,0.1);
+}
+.thumb-single img { width: 100%; height: 100%; object-fit: cover; mix-blend-mode: multiply; }
+
+.thumb-grid {
+    width: 80px; height: 80px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 4px;
+}
+.thumb-mini {
+    background: #f5f5f7;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+}
+.thumb-mini img { width: 100%; height: 100%; object-fit: cover; }
+
+.order-card-info {
+    flex: 1;
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.order-card-info h3 {
+    margin: 0 0 6px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1d1d1f;
+    letter-spacing: -0.01em;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.order-meta {
+    margin: 0 0 14px;
+    font-size: 14px;
+    color: #86868b;
+    font-weight: 500;
+}
+
+.order-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* Status Pills */
+.order-status-pill, .order-payment-status {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 4px 10px;
+    border-radius: 8px;
+}
+.order-status-pending    { background: #fff7ed; color: #c2410c; }
+.order-status-confirmed  { background: #f0fdf4; color: #15803d; }
+.order-status-processing { background: #eff6ff; color: #1d4ed8; }
+.order-status-shipped    { background: #f5f3ff; color: #7c3aed; }
+.order-status-delivered  { background: #f0fdf4; color: #15803d; }
+.order-status-cancelled  { background: #fef2f2; color: #dc2626; }
+.order-status-refunded   { background: #fafafa; color: #6b7280; }
+
+.payment-paid     { background: #f0fdf4; color: #15803d; }
+.payment-pending  { background: #fff7ed; color: #c2410c; }
+.payment-failed   { background: #fef2f2; color: #dc2626; }
+.payment-refunded { background: #fafafa; color: #6b7280; }
+
+.order-card-action {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    padding-left: 24px;
+    border-left: 1px solid rgba(0,0,0,0.06);
+    min-width: 140px;
+}
+
+.order-total {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1d1d1f;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+    white-space: nowrap;
+}
+
+.order-action-link {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #0071e3;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.order-card-link:hover .order-action-link {
+    text-decoration: underline;
+}
+
+/* Empty State */
+.orders-empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    background: white;
+    border-radius: 24px;
+    border: 1px dashed rgba(0,0,0,0.15);
+}
+.orders-empty-icon {
+    width: 80px; height: 80px;
+    border-radius: 40px;
+    background: #f5f5f7;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 24px;
+    color: #86868b;
+}
+.orders-empty-state h2 {
+    font-size: 24px; font-weight: 600; color: #1d1d1f; margin-bottom: 12px;
+}
+.orders-empty-state p {
+    color: #86868b; font-size: 15px; margin-bottom: 24px;
+}
+.action-btn {
+    background: #1d1d1f; color: white; padding: 12px 24px; border-radius: 99px;
+    font-size: 15px; font-weight: 600; text-decoration: none; display: inline-block;
+    transition: opacity 0.2s;
+}
+.action-btn:hover { opacity: 0.8; }
+
+@media (max-width: 768px) {
+    .order-card {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+    }
+    .order-card-info { padding: 0; }
+    .order-card-action {
+        flex-direction: row; align-items: center; justify-content: space-between;
+        padding-left: 0; padding-top: 16px; border-left: none; border-top: 1px solid rgba(0,0,0,0.06);
+    }
+}
+</style>
+{% endblock %}

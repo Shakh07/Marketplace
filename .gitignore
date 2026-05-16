@@ -1,0 +1,24 @@
+# Python/Django
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+db.sqlite3
+datadump.json
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Ide/System
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+.agent/
+.agents/
+
+# Media
+media/

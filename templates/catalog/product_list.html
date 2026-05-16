@@ -1,0 +1,292 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Katalog — NEXUS Premium{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --f-head: 'Outfit', sans-serif;
+        --f-body: 'Inter', sans-serif;
+    }
+
+    .catalog-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 40px 20px 100px;
+    }
+
+    .catalog-header-glass {
+        padding: 40px;
+        margin-bottom: 40px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .breadcrumb {
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #888;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .breadcrumb a { color: #888; text-decoration: none; transition: 0.2s; }
+    .breadcrumb a:hover { color: #000; }
+
+    .catalog-title {
+        font-family: var(--f-head);
+        font-size: 36px;
+        font-weight: 900;
+        margin: 0;
+    }
+
+    .store-layout {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 32px;
+        align-items: start;
+    }
+
+    /* Sidebar Glass */
+    .catalog-sidebar-glass {
+        padding: 30px;
+        position: sticky;
+        top: 100px;
+    }
+
+    .sidebar-section { margin-bottom: 32px; }
+    .sidebar-title {
+        font-family: var(--f-head);
+        font-size: 13px;
+        font-weight: 900;
+        color: #000;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 20px;
+    }
+
+    .sidebar-input {
+        width: 100%;
+        height: 48px;
+        background: rgba(255,255,255,0.4);
+        border: 1px solid rgba(0,0,0,0.05);
+        border-radius: 14px;
+        padding: 0 16px;
+        font-size: 14px;
+        font-weight: 600;
+        outline: none;
+        transition: 0.2s;
+    }
+    .sidebar-input:focus { background: #fff; border-color: #000; }
+
+    /* Product Cards */
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 24px;
+    }
+    .glass-prod-card {
+        background: rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: 28px;
+        padding: 24px;
+        text-decoration: none;
+        color: #000;
+        transition: 0.3s;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+    }
+    .glass-prod-card:hover { background: rgba(255, 255, 255, 0.7); transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.05); }
+    
+    .prod-img-box {
+        aspect-ratio: 1;
+        background: #fff;
+        border-radius: 20px;
+        padding: 20px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+    .prod-img-box img { max-width: 100%; max-height: 100%; object-fit: contain; transition: 0.5s; }
+    .glass-prod-card:hover .prod-img-box img { transform: scale(1.1); }
+
+    .prod-brand { font-size: 10px; font-weight: 800; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .prod-title { font-weight: 700; font-size: 16px; line-height: 1.4; margin-bottom: 12px; flex-grow: 1; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .prod-price { font-family: var(--f-head); font-weight: 900; font-size: 20px; }
+
+    .badge-sale { position: absolute; top: 16px; left: 16px; background: #000; color: #fff; font-size: 10px; font-weight: 900; padding: 4px 10px; border-radius: 10px; z-index: 2; }
+
+    /* Sidebar category links */
+    .sidebar-cat-link {
+        font-weight: 600;
+        color: #555;
+        background: transparent;
+        position: relative;
+    }
+    .sidebar-cat-link::after {
+        content: '';
+        position: absolute;
+        bottom: 4px;
+        left: 14px;
+        right: 14px;
+        height: 2px;
+        background: #0066ff;
+        border-radius: 2px;
+        transform: scaleX(0);
+        transition: transform 0.2s ease;
+    }
+    .sidebar-cat-link:hover {
+        color: #0066ff !important;
+        background: rgba(0, 102, 255, 0.06) !important;
+    }
+    .sidebar-cat-link:hover::after {
+        transform: scaleX(1);
+    }
+    .sidebar-cat-link.active-cat {
+        font-weight: 800;
+        color: #0066ff !important;
+        background: rgba(0, 102, 255, 0.08) !important;
+    }
+    .sidebar-cat-link.active-cat::after {
+        transform: scaleX(1);
+    }
+
+    @media (max-width: 1024px) {
+        .store-layout { grid-template-columns: 1fr; }
+        .catalog-sidebar-glass { position: static; }
+    }
+</style>
+
+<div class="catalog-container">
+    <div class="glass-panel catalog-header-glass">
+        <nav class="breadcrumb">
+            <a href="/">BOSH SAHIFA</a>
+            <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="3" fill="none"><polyline points="9 18 15 12 9 6"/></svg>
+            <a href="{% url 'product_list' %}">KATALOG</a>
+            {% if current_category %}
+            <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="3" fill="none"><polyline points="9 18 15 12 9 6"/></svg>
+            <span>{{ current_category.category_name|upper }}</span>
+            {% endif %}
+        </nav>
+        <h1 class="catalog-title">{% if current_category %}{{ current_category.category_name }}{% else %}Barcha Mahsulotlar{% endif %}</h1>
+    </div>
+
+    <div class="store-layout" id="store-ajax-root" data-ajax-zone>
+        <aside class="glass-panel catalog-sidebar-glass">
+            <div class="sidebar-section">
+                <h4 class="sidebar-title">Qidiruv</h4>
+                <form method="GET" action="{% url 'product_list' %}" id="sidebar-search-form">
+                    {% if category_slug %}<input type="hidden" name="category" value="{{ category_slug }}">{% endif %}
+                    <input type="text" name="q" id="sidebar-q" value="{{ search_q }}" class="sidebar-input" placeholder="Mahsulot nomi...">
+                </form>
+            </div>
+
+            {% if all_categories %}
+            <div class="sidebar-section" style="border-top:1px solid rgba(0,0,0,0.05); padding-top:20px;">
+                <h4 class="sidebar-title">Toifalar</h4>
+                <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:4px;">
+                    <li>
+                        <a href="{% url 'product_list' %}{% if search_q %}?q={{ search_q }}{% endif %}"
+                           class="sidebar-cat-link {% if not current_category %}active-cat{% endif %}"
+                           style="display:flex; align-items:center; justify-content:space-between; padding:10px 14px; border-radius:12px; font-size:14px; text-decoration:none; transition:0.2s;">
+                            Barchasi
+                        </a>
+                    </li>
+                    {% for cat in all_categories %}
+                    <li>
+                        <a href="{% url 'product_list' %}?category={{ cat.slug }}{% if search_q %}&q={{ search_q }}{% endif %}"
+                           class="sidebar-cat-link {% if current_category.slug == cat.slug %}active-cat{% endif %}"
+                           style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:12px; font-size:14px; text-decoration:none; transition:0.2s;">
+                            {% if cat.image_url %}<img src="{{ cat.image_url.url }}" style="width:20px;height:20px;object-fit:contain;border-radius:4px;">{% endif %}
+                            {{ cat.category_name }}
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <div class="sidebar-section" style="border-top:1px solid rgba(0,0,0,0.05); padding-top:20px;">
+                <h4 class="sidebar-title">Mavjudligi</h4>
+                <label style="display:flex; align-items:center; gap:12px; cursor:pointer; font-size:14px; font-weight:600;">
+                    <input type="checkbox" {% if current_in_stock == '1' %}checked{% endif %} onchange="location.href='{% url 'product_list' %}?in_stock=1{% if category_slug %}&category={{ category_slug }}{% endif %}{% if search_q %}&q={{ search_q }}{% endif %}'" style="width:20px; height:20px; accent-color:#000;">
+                    Faqat mavjud mahsulotlar
+                </label>
+            </div>
+        </aside>
+
+        <main class="catalog-main">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; padding:0 10px;">
+                <div style="font-size:14px; font-weight:700; color:#888;">Topildi: <span style="color:#000;">{{ products|length }}</span> mahsulot</div>
+                
+                <div style="font-size:14px; font-weight:700;">
+                    Saralash: 
+                    <select onchange="location.href=this.value" style="background:none; border:none; font-weight:900; font-family:var(--f-head); cursor:pointer; outline:none;">
+                        <option value="?sort=-created_at" {% if current_sort == '-created_at' %}selected{% endif %}>Eng yangi</option>
+                        <option value="?sort=base_price" {% if current_sort == 'base_price' %}selected{% endif %}>Arzonroq</option>
+                        <option value="?sort=-base_price" {% if current_sort == '-base_price' %}selected{% endif %}>Qimmatroq</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="product-grid">
+                {% for product in products %}
+                <a href="{% url 'product_detail' product.slug %}" class="glass-prod-card">
+                    {% if product.sale_price %}<div class="badge-sale">SALE</div>{% endif %}
+                    <div class="prod-img-box">
+                        {% if product.images.first %}
+                        <img src="{{ product.images.first.image_url.url }}">
+                        {% endif %}
+                    </div>
+                    <div class="prod-brand">{{ product.brand.brand_name }}</div>
+                    <h3 class="prod-title">{{ product.product_name }}</h3>
+                    <div class="prod-price">
+                        {{ product.current_price|floatformat:0|intcomma }} <span style="font-size:13px; font-weight:600; color:#999;">so'm</span>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+// AJAX logic remains same but selectors updated
+(function() {
+    var ROOT_ID = 'store-ajax-root';
+    function getRoot() { return document.getElementById(ROOT_ID); }
+    function bindAll() {
+        var root = getRoot();
+        if (!root) return;
+        var searchInput = root.querySelector('#sidebar-q');
+        var searchForm = root.querySelector('#sidebar-search-form');
+        var timer;
+        if (searchInput && searchForm) {
+            searchInput.addEventListener('input', function() {
+                clearTimeout(timer);
+                timer = setTimeout(function() {
+                    var dest = searchForm.action + '?' + new URLSearchParams(new FormData(searchForm)).toString();
+                    fetch(dest, { headers:{'X-Requested-With':'XMLHttpRequest'} })
+                    .then(r => r.text())
+                    .then(html => {
+                        var p = new DOMParser();
+                        var d = p.parseFromString(html, 'text/html');
+                        getRoot().innerHTML = d.getElementById(ROOT_ID).innerHTML;
+                        history.pushState(null, '', dest);
+                        bindAll();
+                    });
+                }, 800);
+            });
+        }
+    }
+    bindAll();
+})();
+</script>
+{% endblock %}

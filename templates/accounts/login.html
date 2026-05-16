@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block title %}Kirish — NEXUS{% endblock %}
+{% block meta_description %}NEXUS hisobingizga kiring. Buyurtmalar, profil va barcha imtiyozlar bir joyda.{% endblock %}
+
+{% block content %}
+<div style="min-height:calc(100vh - 140px); display:flex; align-items:center; justify-content:center; padding:40px 20px; background:var(--bg-secondary);">
+    <div style="width:100%; max-width:420px;">
+
+        <!-- Logo -->
+        <div style="text-align:center; margin-bottom:32px;">
+            <a href="{% url 'home' %}" style="text-decoration:none;">
+                <div style="font-size:28px; font-weight:900; color:var(--text-primary); letter-spacing:0.08em;">NEXUS</div>
+            </a>
+            <p style="font-size:13px; color:var(--text-muted); margin-top:6px;">ID</p>
+        </div>
+
+        <!-- Card -->
+        <div style="background:white; border:1px solid var(--border-color); border-radius:var(--radius-xl); padding:36px 36px 28px; box-shadow:var(--shadow-sm);">
+            <h1 style="font-size:24px; font-weight:700; color:var(--text-primary); margin:0 0 6px; text-align:center;">Kirish</h1>
+            <p style="font-size:14px; color:var(--text-muted); text-align:center; margin:0 0 28px;">NEXUS hisobingizga kirish</p>
+
+            {% if messages %}
+            <div style="margin-bottom:20px;">
+                {% for message in messages %}
+                <div style="padding:12px 16px; border-radius:var(--radius-md); font-size:14px; font-weight:500;
+                    {% if message.tags == 'error' %}background:rgba(229,57,53,0.08);color:#c62828;border:1px solid rgba(229,57,53,0.2);
+                    {% else %}background:rgba(76,175,80,0.08);color:#2e7d32;border:1px solid rgba(76,175,80,0.2);{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <form method="POST" id="login-form">
+                {% csrf_token %}
+
+                <!-- Username -->
+                <div style="margin-bottom:14px;">
+                    <label style="display:block; font-size:12px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px;">
+                        NEXUS ID (Username)
+                    </label>
+                    <input type="text" name="username" id="id_username"
+                           placeholder="username"
+                           autocomplete="username"
+                           required
+                           style="width:100%; padding:11px 14px; border:1.5px solid var(--border-color); border-radius:var(--radius-md); font-size:15px; font-family:var(--font-stack); color:var(--text-primary); outline:none; box-sizing:border-box; transition:border-color 0.2s, box-shadow 0.2s;"
+                           onfocus="this.style.borderColor='var(--accent-blue)';this.style.boxShadow='0 0 0 3px rgba(0,108,225,0.1)'"
+                           onblur="this.style.borderColor='var(--border-color)';this.style.boxShadow='none'">
+                </div>
+
+                <!-- Password -->
+                <div style="margin-bottom:22px;">
+                    <label style="display:block; font-size:12px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px;">
+                        Maxfiy so'z
+                    </label>
+                    <div style="position:relative;">
+                        <input type="password" name="password" id="login_password"
+                               placeholder="••••••••"
+                               autocomplete="current-password"
+                               required
+                               style="width:100%; padding:11px 44px 11px 14px; border:1.5px solid var(--border-color); border-radius:var(--radius-md); font-size:15px; font-family:var(--font-stack); color:var(--text-primary); outline:none; box-sizing:border-box; transition:border-color 0.2s, box-shadow 0.2s;"
+                               onfocus="this.style.borderColor='var(--accent-blue)';this.style.boxShadow='0 0 0 3px rgba(0,108,225,0.1)'"
+                               onblur="this.style.borderColor='var(--border-color)';this.style.boxShadow='none'">
+                        <button type="button" onclick="togglePasswordVisibility('login_password','eye_login')"
+                                style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--text-muted); display:flex; padding:4px;"
+                                aria-label="Parolni ko'rsatish">
+                            <svg id="eye_login" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Submit -->
+                <button type="submit" id="login-submit-btn"
+                        style="width:100%; padding:13px; background:var(--accent-blue); color:white; border:none; border-radius:var(--radius-md); font-size:15px; font-weight:600; cursor:pointer; font-family:var(--font-stack); transition:background 0.2s, transform 0.1s; display:flex; align-items:center; justify-content:center; gap:8px;"
+                        onmouseover="this.style.background='var(--accent-blue-hover)'"
+                        onmouseout="this.style.background='var(--accent-blue)'">
+                    Kirish
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+            </form>
+        </div>
+
+        <!-- Footer links -->
+        <div style="text-align:center; margin-top:20px;">
+            <p style="font-size:14px; color:var(--text-muted);">
+                NEXUS ID ga ega emasmisiz?
+                <a href="{% url 'register' %}" style="color:var(--accent-blue); font-weight:600; text-decoration:none;"
+                   onmouseover="this.style.textDecoration='underline'"
+                   onmouseout="this.style.textDecoration='none'">Hozir yarating ›</a>
+            </p>
+        </div>
+
+        <!-- Trust badges -->
+        <div style="display:flex; justify-content:center; gap:24px; margin-top:24px; padding-top:20px; border-top:1px solid var(--border-color);">
+            <div style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-muted);">
+                <svg viewBox="0 0 24 24" width="14" height="14" stroke="var(--accent-blue)" stroke-width="2" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Xavfsiz kirish
+            </div>
+            <div style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-muted);">
+                <svg viewBox="0 0 24 24" width="14" height="14" stroke="var(--accent-blue)" stroke-width="2" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                Shifrlangan
+            </div>
+            <div style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-muted);">
+                <svg viewBox="0 0 24 24" width="14" height="14" stroke="var(--accent-blue)" stroke-width="2" fill="none"><polyline points="20 6 9 17 4 12"/></svg>
+                Ishonchli
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function togglePasswordVisibility(inputId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon = document.getElementById(iconId);
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+    } else {
+        input.type = 'password';
+        icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+    }
+}
+
+// Submit loading state
+document.getElementById('login-form').addEventListener('submit', function() {
+    const btn = document.getElementById('login-submit-btn');
+    btn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" stroke="white" stroke-width="2" fill="none" style="animation:spin 0.7s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Kirish...';
+    btn.style.opacity = '0.8';
+});
+</script>
+<style>@keyframes spin { to { transform:rotate(360deg); } }</style>
+{% endblock %}

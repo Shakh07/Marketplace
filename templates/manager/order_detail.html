@@ -1,0 +1,292 @@
+{% extends 'manager/base_manager.html' %}
+{% load custom_filters %}
+{% block title %}Buyurtma #{{ order.order_number }}{% endblock %}
+{% block nav_orders %}active{% endblock %}
+{% block page_title %}#{{ order.order_number }}{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'manager_order_list' %}" class="adm-btn">
+    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    Ro'yxatga qaytish
+</a>
+<a href="{% url 'order_receipt_print' order.id %}?auto_print=1" class="adm-btn">
+    <svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+    Chek chop etish
+</a>
+{% endblock %}
+
+{% block content %}
+<style>
+    .ord-grid {
+        display: grid;
+        grid-template-columns: 1fr 280px;
+        gap: 16px;
+        align-items: start;
+    }
+    @media(max-width:900px){ .ord-grid { grid-template-columns:1fr; } }
+
+    /* Info rows */
+    .irow { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #f0f0f0; font-size:13px; }
+    .irow:last-child { border:none; }
+    .ilbl { color:#999; font-weight:500; }
+    .ival { font-weight:700; color:#111; text-align:right; }
+
+    /* Status select */
+    .status-select {
+        appearance: none;
+        border: 1px solid #e0e0e0;
+        background: white;
+        padding: 6px 32px 6px 12px;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        cursor: pointer;
+        outline: none;
+        border-radius: 2px;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolyline points='6 9 12 15 18 9' fill='none' stroke='%23999' stroke-width='2'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 8px center;
+        background-size: 14px;
+    }
+    .status-select:focus { border-color: #006ce1; }
+
+    /* Address form */
+    .addr-input {
+        width: 100%;
+        padding: 9px 12px;
+        border: 1px solid #e0e0e0;
+        background: white;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 500;
+        color: #111;
+        outline: none;
+        border-radius: 0;
+        transition: border-color 0.15s;
+    }
+    .addr-input:focus { border-color: #006ce1; }
+    .addr-label { font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #999; margin-bottom: 5px; display: block; }
+
+    @media print {
+        .adm-topbar, .adm-subnav, .adm-page-header, .no-print { display: none !important; }
+        .adm-content { padding: 0 !important; }
+    }
+</style>
+
+<div class="ord-grid">
+
+    <!-- ── LEFT COLUMN ── -->
+    <div>
+
+        <!-- Order meta bar -->
+        <div class="adm-card" style="margin-bottom:16px;">
+            <div style="padding:16px 20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+                <div>
+                    <div style="font-size:11px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; color:#999; margin-bottom:4px;">Buyurtma sanasi</div>
+                    <div style="font-size:13px; font-weight:600;">{{ order.created_at|date:"d F Y, H:i" }}</div>
+                </div>
+                <div>
+                    <div style="font-size:11px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; color:#999; margin-bottom:6px;">Buyurtma holati</div>
+                    <form method="POST" action="{% url 'manager_order_status' order.id %}" id="status-form" style="display:inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                        <select name="status" class="status-select" onchange="this.form.submit()">
+                            {% for sv, sl in order_statuses %}
+                            <option value="{{ sv }}" {% if order.order_status == sv %}selected{% endif %}>{{ sl }}</option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                </div>
+                <div>
+                    <div style="font-size:11px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; color:#999; margin-bottom:4px;">To'lov</div>
+                    <span class="pill pill-{{ order.payment_status }}">{{ order.get_payment_status_display }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Items table -->
+        <div class="adm-card">
+            <div class="adm-card-head">
+                <span class="adm-card-title">Xarid tarkibi</span>
+                <span style="font-size:12px; color:#aaa; font-weight:600;">{{ order.items.count }} ta mahsulot</span>
+            </div>
+            <div class="adm-table-wrap">
+                <table class="adm-table">
+                    <thead>
+                        <tr>
+                            <th>Mahsulot</th>
+                            <th>Narx</th>
+                            <th>Soni</th>
+                            <th style="text-align:right;">Jami</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order.items.all %}
+                        <tr>
+                            <td>
+                                <div style="display:flex; align-items:center; gap:12px;">
+                                    <div style="width:44px; height:44px; background:#f5f5f5; display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden;">
+                                        {% if item.product and item.product.images.first %}
+                                        <img src="{{ item.product.images.first.image_url.url }}" style="width:100%; height:100%; object-fit:contain;">
+                                        {% else %}
+                                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="#ccc" stroke-width="1.5" fill="none"><rect x="3" y="3" width="18" height="18" rx="1"/></svg>
+                                        {% endif %}
+                                    </div>
+                                    <div style="font-weight:600; font-size:13px;">{{ item.product.product_name|default:"O'chirilgan" }}</div>
+                                </div>
+                            </td>
+                            <td style="font-size:13px; white-space:nowrap;">{{ item.unit_price|floatformat:0|intspace }} <span style="color:#aaa; font-size:10px;">so'm</span></td>
+                            <td style="font-weight:700;">{{ item.quantity }}</td>
+                            <td style="text-align:right; font-family:'Outfit',sans-serif; font-size:14px; font-weight:800; white-space:nowrap;">{{ item.subtotal|floatformat:0|intspace }} <span style="color:#aaa; font-size:10px; font-weight:500;">so'm</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <!-- Totals -->
+            <div style="padding:16px 20px; border-top:1px solid #f0f0f0; background:#fafafa;">
+                <div class="irow"><span class="ilbl">Mahsulotlar jami</span><span class="ival">{{ order.total_amount|floatformat:0|intspace }} so'm</span></div>
+                <div class="irow"><span class="ilbl">Yetkazib berish</span><span class="ival" style="color:#16a34a;">Bepul</span></div>
+                <div style="display:flex; justify-content:space-between; align-items:baseline; padding-top:12px; border-top:2px solid #000; margin-top:4px;">
+                    <span style="font-size:11px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; color:#555;">Jami:</span>
+                    <span style="font-family:'Outfit',sans-serif; font-size:22px; font-weight:900; color:#006ce1;">{{ order.total_amount|floatformat:0|intspace }} so'm</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delivery address -->
+        <div class="adm-card">
+            <div class="adm-card-head">
+                <span class="adm-card-title">Yetkazib berish manzili</span>
+                <button onclick="toggleAddrEdit()" class="adm-btn no-print" id="addr-toggle-btn">Tahrirlash</button>
+            </div>
+            <div class="adm-card-body">
+                <!-- Display -->
+                <div id="addr-display" style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+                    <div>
+                        <div class="addr-label">Qabul qiluvchi</div>
+                        <div style="font-size:14px; font-weight:700;">{{ order.delivery_full_name|default:order.user.get_full_name }}</div>
+                        <div class="addr-label" style="margin-top:14px;">Telefon</div>
+                        <div style="font-size:14px; font-weight:700; color:#006ce1;">{{ order.delivery_phone|default:order.user.phone }}</div>
+                    </div>
+                    <div>
+                        <div class="addr-label">Manzil</div>
+                        <div style="font-size:14px; font-weight:600; line-height:1.5;">{{ order.delivery_street }}<br>{{ order.delivery_city }}{% if order.delivery_region %}, {{ order.delivery_region }}{% endif %}</div>
+                    </div>
+                </div>
+                <!-- Edit form -->
+                <div id="addr-form" style="display:none;">
+                    <form onsubmit="saveAddress(event)" id="addr-edit-form">
+                        {% csrf_token %}
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                            <div style="grid-column:1/-1;">
+                                <label class="addr-label">F.I.SH</label>
+                                <input class="addr-input" type="text" name="full_name" value="{{ order.delivery_full_name|default:order.user.get_full_name }}">
+                            </div>
+                            <div>
+                                <label class="addr-label">Telefon</label>
+                                <input class="addr-input" type="text" name="phone" value="{{ order.delivery_phone|default:order.user.phone }}">
+                            </div>
+                            <div>
+                                <label class="addr-label">Shahar</label>
+                                <input class="addr-input" type="text" name="city" value="{{ order.delivery_city }}">
+                            </div>
+                            <div style="grid-column:1/-1;">
+                                <label class="addr-label">Ko'cha, uy</label>
+                                <input class="addr-input" type="text" name="street" value="{{ order.delivery_street }}">
+                            </div>
+                        </div>
+                        <div style="margin-top:14px; display:flex; gap:8px;">
+                            <button type="submit" id="addr-save-btn" class="adm-btn adm-btn-primary">Saqlash</button>
+                            <button type="button" onclick="toggleAddrEdit()" class="adm-btn">Bekor qilish</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ── RIGHT SIDEBAR ── -->
+    <div>
+
+        <!-- Payment info -->
+        <div class="adm-card" style="margin-bottom:16px;">
+            <div class="adm-card-head"><span class="adm-card-title">To'lov</span></div>
+            <div class="adm-card-body">
+                <div class="irow">
+                    <span class="ilbl">Holat</span>
+                    <span class="pill pill-{{ order.payment_status }}">{{ order.get_payment_status_display }}</span>
+                </div>
+                <div class="irow">
+                    <span class="ilbl">Usul</span>
+                    <span class="ival">
+                        {% if order.payment_method == 'cash' %}Naqd pul
+                        {% elif order.payment_method == 'card' %}Plastik karta
+                        {% elif order.payment_method == 'transfer' %}Bank o'tkazmasi
+                        {% else %}{{ order.payment_method|default:"Noma'lum" }}{% endif %}
+                    </span>
+                </div>
+                <div class="irow">
+                    <span class="ilbl">Yetkazish</span>
+                    <span class="ival" style="color:#16a34a;">Bepul</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customer info -->
+        <div class="adm-card">
+            <div class="adm-card-head"><span class="adm-card-title">Mijoz</span></div>
+            <div class="adm-card-body">
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px; padding-bottom:16px; border-bottom:1px solid #f0f0f0;">
+                    <div style="width:36px; height:36px; background:#006ce1; border-radius:2px; color:white; font-size:14px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                        {{ order.user.first_name|first|default:order.user.username|first|upper }}
+                    </div>
+                    <div>
+                        <div style="font-size:13px; font-weight:700;">{{ order.user.get_full_name|default:order.user.username }}</div>
+                        <div style="font-size:11px; color:#aaa;">{{ order.user.email }}</div>
+                    </div>
+                </div>
+                <div class="irow">
+                    <span class="ilbl">Jami xaridlar</span>
+                    <span class="ival" style="color:#006ce1;">{{ order.user.orders.count }} ta</span>
+                </div>
+                <div class="irow">
+                    <span class="ilbl">A'zo bo'lgan</span>
+                    <span class="ival">{{ order.user.date_joined|date:"d.m.Y" }}</span>
+                </div>
+                <div style="margin-top:14px;">
+                    <a href="{% url 'manager_user_detail' order.user.id %}" class="adm-btn" style="width:100%; justify-content:center;">Mijoz profilini ko'rish</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+function toggleAddrEdit() {
+    const d = document.getElementById('addr-display');
+    const f = document.getElementById('addr-form');
+    const btn = document.getElementById('addr-toggle-btn');
+    if (d.style.display === 'none') {
+        d.style.display = 'grid'; f.style.display = 'none'; btn.textContent = 'Tahrirlash';
+    } else {
+        d.style.display = 'none'; f.style.display = 'block'; btn.textContent = 'Bekor qilish';
+    }
+}
+
+function saveAddress(e) {
+    e.preventDefault();
+    const btn = document.getElementById('addr-save-btn');
+    btn.disabled = true; btn.textContent = 'Saqlanmoqda...';
+    const fd = new FormData(document.getElementById('addr-edit-form'));
+    fetch('{% url "manager_order_address" order.id %}', {
+        method: 'POST',
+        headers: {'X-Requested-With': 'XMLHttpRequest'},
+        body: fd
+    }).then(r => r.json()).then(d => { if (d.success) location.reload(); });
+}
+</script>
+{% endblock %}

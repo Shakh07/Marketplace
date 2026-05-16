@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}{{ product.product_name }} — NEXUS Premium{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --f-head: 'Outfit', sans-serif;
+        --f-body: 'Inter', sans-serif;
+    }
+
+    .n-detail-page {
+        padding: 40px 20px 120px;
+        max-width: 1300px;
+        margin: 0 auto;
+    }
+
+    .breadcrumb {
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #888;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 40px;
+        padding-left: 10px;
+    }
+    .breadcrumb a { color: #888; text-decoration: none; transition: 0.2s; }
+    .breadcrumb a:hover { color: #000; }
+
+    .n-grid {
+        display: grid;
+        grid-template-columns: 1fr 480px;
+        gap: 40px;
+        align-items: start;
+    }
+
+    /* Gallery Glass */
+    .glass-gallery {
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        position: sticky;
+        top: 100px;
+    }
+    .n-stage {
+        aspect-ratio: 1;
+        background: #fff;
+        border-radius: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px;
+        overflow: hidden;
+    }
+    .n-stage img { max-width: 100%; max-height: 100%; object-fit: contain; filter: drop-shadow(0 20px 40px rgba(0,0,0,0.08)); transition: 0.5s; }
+    .n-stage:hover img { transform: scale(1.05); }
+
+    .n-thumbs { display: flex; gap: 12px; justify-content: center; }
+    .n-thumb { width: 70px; height: 70px; background: #fff; border-radius: 12px; border: 2px solid transparent; padding: 5px; cursor: pointer; transition: 0.2s; }
+    .n-thumb.active { border-color: #000; }
+    .n-thumb img { width: 100%; height: 100%; object-fit: contain; }
+
+    /* Purchase Box Glass */
+    .glass-purchase {
+        padding: 40px;
+    }
+    .n-brand { font-size: 12px; font-weight: 900; color: #006ce1; letter-spacing: 2px; margin-bottom: 12px; display: block; }
+    .n-title { font-family: var(--f-head); font-size: 32px; font-weight: 900; line-height: 1.2; margin-bottom: 20px; }
+    
+    .n-price-box { border-top: 1px solid rgba(0,0,0,0.05); padding-top: 24px; margin-bottom: 32px; }
+    .n-price { font-family: var(--f-head); font-size: 36px; font-weight: 900; display: flex; align-items: baseline; gap: 8px; }
+    .n-price span { font-size: 14px; color: #888; font-weight: 700; }
+    .n-old-price { font-size: 18px; color: #bbb; text-decoration: line-through; margin-left: 10px; font-weight: 600; }
+
+    .n-qty-box { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.03); padding: 16px 20px; border-radius: 20px; margin-bottom: 24px; }
+    .n-qty-ctrl { display: flex; align-items: center; gap: 15px; }
+    .n-qty-ctrl button { width: 32px; height: 32px; border-radius: 50%; border: 1px solid #ddd; background: #fff; cursor: pointer; font-weight: 900; transition: 0.2s; }
+    .n-qty-ctrl button:hover { background: #000; color: #fff; border-color: #000; }
+    .n-qty-ctrl input { width: 40px; border: none; background: none; text-align: center; font-weight: 800; font-size: 16px; outline: none; }
+
+    .btn-buy { width: 100%; height: 64px; background: #000; color: #fff; border: none; border-radius: 32px; font-family: var(--f-head); font-size: 16px; font-weight: 800; letter-spacing: 1px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .btn-buy:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+
+    /* Info Cards */
+    .glass-info { margin-top: 40px; padding: 40px; }
+    .info-title { font-family: var(--f-head); font-size: 20px; font-weight: 900; margin-bottom: 24px; }
+    .spec-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 14px; font-weight: 600; }
+    .spec-row .lbl { color: #888; }
+
+    @media (max-width: 1024px) {
+        .n-grid { grid-template-columns: 1fr; }
+        .glass-gallery { position: static; padding: 20px; }
+    }
+</style>
+
+<div class="n-detail-page">
+    <nav class="breadcrumb">
+        <a href="/">BOSH SAHIFA</a>
+        <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="3" fill="none"><polyline points="9 18 15 12 9 6"/></svg>
+        <a href="{% url 'product_list' %}">KATALOG</a>
+        <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="3" fill="none"><polyline points="9 18 15 12 9 6"/></svg>
+        <span>{{ product.product_name|upper }}</span>
+    </nav>
+
+    <div class="n-grid">
+        <div class="main-col">
+            <div class="glass-panel glass-gallery">
+                <div class="n-stage">
+                    {% if product.images.first %}
+                    <img src="{{ product.images.first.image_url.url }}" id="main-img">
+                    {% endif %}
+                </div>
+                {% if product.images.count > 1 %}
+                <div class="n-thumbs">
+                    {% for img in product.images.all %}
+                    <div class="n-thumb {% if forloop.first %}active{% endif %}" onclick="setImg(this, '{{ img.image_url.url }}')">
+                        <img src="{{ img.image_url.url }}">
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="glass-panel glass-info">
+                <h2 class="info-title">MAHSULOT TAVSIFI</h2>
+                <div style="line-height:1.8; color:#444; font-size:15px; font-weight:500;">
+                    {{ product.description|linebreaks }}
+                </div>
+            </div>
+        </div>
+
+        <aside class="side-col">
+            <div class="glass-panel glass-purchase">
+                <span class="n-brand">{{ product.brand.brand_name|upper }}</span>
+                <h1 class="n-title">{{ product.product_name }}</h1>
+                
+                <div class="n-price-box">
+                    <div class="n-price">
+                        {{ product.current_price|floatformat:0|intcomma }} <span>so'm</span>
+                        {% if product.sale_price %}
+                        <span class="n-old-price">{{ product.base_price|floatformat:0|intcomma }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <form method="POST" action="{% url 'add_to_cart' product.id %}" id="add-form">
+                    {% csrf_token %}
+                    <div class="n-qty-box">
+                        <span style="font-size:12px; font-weight:900; color:#888;">MIQDOR:</span>
+                        <div class="n-qty-ctrl">
+                            <button type="button" onclick="const i=document.getElementById('qi'); i.value=Math.max(1,parseInt(i.value)-1)">−</button>
+                            <input type="number" id="qi" name="quantity" value="1" min="1" readonly>
+                            <button type="button" onclick="const i=document.getElementById('qi'); i.value=parseInt(i.value)+1">+</button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-buy">
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                        SAVATCHAGA QO'SHISH
+                    </button>
+                </form>
+
+                <div style="margin-top:32px;">
+                    <div class="spec-row"><span class="lbl">Model kodi</span><span>{{ product.sku|default:"NEX-PRD" }}</span></div>
+                    <div class="spec-row"><span class="lbl">Kafolat</span><span>12 oy rasmiy servis</span></div>
+                    <div class="spec-row"><span class="lbl">Yetkazib berish</span><span style="color:#15803d;">Bepul</span></div>
+                </div>
+            </div>
+        </aside>
+    </div>
+</div>
+
+<script>
+function setImg(el, src) {
+    document.getElementById('main-img').src = src;
+    document.querySelectorAll('.n-thumb').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+}
+</script>
+{% endblock %}

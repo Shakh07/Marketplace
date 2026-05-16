@@ -1,0 +1,545 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}NEXUS{% endblock %} — O'zbekiston</title>
+    <meta name="description" content="{% block meta_description %}NEXUS — O'zbekistondagi premium elektronika do'koni{% endblock %}">
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v={{ request.path|urlencode }}">
+    <style>
+        :root {
+            --n-bg: #f5f7fa;
+            --n-glass: rgba(255, 255, 255, 0.65);
+            --n-glass-dark: rgba(255, 255, 255, 0.85);
+            --n-blur: 25px;
+            --n-border: rgba(255, 255, 255, 0.4);
+            --n-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+            --f-head: 'Outfit', sans-serif;
+            --f-body: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            font-family: var(--f-body);
+            color: #000;
+            opacity: 1;
+        }
+
+        /* Glass Utility */
+        .glass-panel {
+            background: var(--n-glass);
+            backdrop-filter: blur(var(--n-blur));
+            -webkit-backdrop-filter: blur(var(--n-blur));
+            border: 1px solid var(--n-border);
+            box-shadow: var(--n-shadow);
+            border-radius: 24px;
+        }
+
+        .asus-nav {
+            background: rgba(255, 255, 255, 0.4) !important;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: none !important;
+        }
+
+        .user-dropdown-glass {
+            background: #fff !important;
+            backdrop-filter: none !important;
+            border-radius: 0 !important;
+            border: 1px solid #e0e0e0 !important;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1) !important;
+        }
+
+        .dropdown-glass-item:hover {
+            background: #f5f5f5 !important;
+            border-radius: 0 !important;
+        }
+
+        /* Cart badge overflow fix */
+        .pill-btn, .pill-icon, .icon-link, .nav-icon-btn { overflow: visible !important; }
+
+        /* Announce bar rotation */
+        .announce-slide { display: none; }
+        .announce-slide.active { display: inline; }
+    </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════
+     ASUS-STYLE TOP BAR (Black)
+══════════════════════════════════════════════ -->
+<div class="asus-header-top">
+    <div class="top-nav-inner">
+        <div class="top-nav-left">
+
+            <a href="{% url 'product_list' %}?category=gaming" class="top-nav-link">ROG</a>
+            <a href="{% url 'product_list' %}?category=creators" class="top-nav-link">Creators</a>
+            <a href="{% url 'product_list' %}?category=business" class="top-nav-link">Business</a>
+        </div>
+        <div class="top-nav-right">
+            <a href="{% url 'help_page' %}" class="top-nav-link">Support</a>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     NAVIGATION (ASUS-style Main Nav)
+══════════════════════════════════════════════ -->
+<nav class="asus-nav" id="main-nav">
+    <div class="nav-inner">
+
+        <!-- Left: Hamburger & Logo -->
+        <div style="display:flex; align-items:center; gap:20px;">
+            <button class="nav-hamburger" id="nav-hamburger" aria-label="Menyu"
+                    onclick="toggleMegaMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <a href="{% url 'home' %}" class="nav-logo" aria-label="Bosh sahifa">
+                <span style="font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 20px; letter-spacing: 1px; color: #111;">NEXUS</span>
+            </a>
+        </div>
+
+        <!-- Center: Logo -->
+        <!-- Main Desktop Links (ASUS Style Center Nav) -->
+        <div class="asus-nav-links-desktop">
+            <a href="{% url 'product_list' %}?category=laptops" class="asus-nav-item">Laptops</a>
+            <a href="{% url 'product_list' %}?category=monitors" class="asus-nav-item">Displays / Desktops</a>
+            <a href="{% url 'product_list' %}?category=components" class="asus-nav-item">Motherboards / Components</a>
+            <a href="{% url 'product_list' %}?category=accessories" class="asus-nav-item">Accessories</a>
+            <a href="{% url 'product_list' %}?category=gaming" class="asus-nav-item nav-item-bold">Gaming</a>
+        </div>
+
+        <!-- Right: Icons -->
+        <div class="nav-right">
+
+            <!-- Search -->
+            <button type="button"
+                    class="nav-icon-btn"
+                    onclick="openSearch()"
+                    aria-label="Qidiruv"
+                    title="Qidiruv">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </button>
+
+            <!-- Cart -->
+            <a href="{% url 'cart' %}" class="nav-icon-btn" aria-label="Savatcha" title="Savatcha" style="position:relative;">
+                <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                {% if user.is_authenticated %}
+                    {% with cart_count=user.cart_items.count %}
+                    {% if cart_count > 0 %}
+                    <span class="cart-badge-pill">{{ cart_count }}</span>
+                    {% endif %}
+                    {% endwith %}
+                {% endif %}
+            </a>
+
+            <!-- User -->
+            {% if user.is_authenticated %}
+            <div class="user-menu-wrapper">
+                <button class="nav-icon-btn static-pill-btn user-menu-btn"
+                        aria-haspopup="true"
+                        style="gap:8px;">
+                    <div class="avatar-pill">{{ user.first_name|default:user.username|slice:":1"|upper }}{{ user.last_name|slice:":1"|upper }}</div>
+                    <span class="static-pill-text" style="font-size:13px; color:var(--text-primary);">{{ user.first_name|default:user.username }}</span>
+                    <svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="2.5" fill="none" class="chevron-icon"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+
+                <div class="user-dropdown-glass" style="width:220px; padding:0;">
+                    <!-- User header -->
+                    <div style="padding:14px 16px 12px; border-bottom:1px solid #f0f0f0;">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <div style="width:34px; height:34px; background:#006ce1; border-radius:2px; color:white; font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0;">{{ user.first_name|default:user.username|slice:":1"|upper }}{{ user.last_name|slice:":1"|upper }}</div>
+                            <div style="min-width:0;">
+                                <div style="font-size:13px; font-weight:700; color:#111; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ user.get_full_name|default:user.username }}</div>
+                                <div style="font-size:11px; color:#999;">{{ user.email|default:"NEXUS ID" }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Menu items -->
+                    <a href="{% url 'profile' %}" class="dropdown-glass-item">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="#666" stroke-width="2" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        Mening profilim
+                    </a>
+                    <a href="{% url 'order_list' %}" class="dropdown-glass-item">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="#666" stroke-width="2" fill="none"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+                        Buyurtmalarim
+                    </a>
+                    <a href="{% url 'cart' %}" class="dropdown-glass-item">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="#666" stroke-width="2" fill="none"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                        Savatcha
+                        {% with cart_count=user.cart_items.count %}{% if cart_count > 0 %}<span style="margin-left:auto; background:#006ce1; color:white; font-size:9px; font-weight:800; padding:2px 6px; border-radius:2px;">{{ cart_count }}</span>{% endif %}{% endwith %}
+                    </a>
+                    {% if user.user_type == 'admin' or user.is_staff %}
+                    <div style="height:1px; background:#f0f0f0; margin:4px 0;"></div>
+                    <a href="{% url 'manager_dashboard' %}" class="dropdown-glass-item" style="color:#006ce1; font-weight:700;">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="#006ce1" stroke-width="2" fill="none"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                        Admin panel
+                    </a>
+                    {% endif %}
+                    <div style="height:1px; background:#f0f0f0; margin:4px 0;"></div>
+                    <form method="POST" action="{% url 'logout' %}" class="dropdown-logout-form">
+                        {% csrf_token %}
+                        <button type="submit" class="dropdown-glass-item danger-item" style="width:100%; color:#dc2626;">
+                            <svg viewBox="0 0 24 24" width="14" height="14" stroke="#dc2626" stroke-width="2" fill="none"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                            Chiqish
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% else %}
+            <a href="{% url 'login' %}" class="nav-icon-btn" aria-label="Kirish">
+                <svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                <span style="font-size:13px; font-weight:500;">Kirish</span>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+<!-- Redesigned Visual Mega Menu -->
+<div class="nav-mega-menu" id="mega-menu">
+    <div class="mega-menu-inner visual-mega">
+        
+        <!-- Category Col (Laptops) -->
+        <a href="{% url 'product_list' %}?category=laptops" class="mega-visual-item">
+            <div class="mega-img-box">
+                <img src="https://dlcdnwebimgs.asus.com/gain/43C6E97A-F78F-4D2A-B981-678BD1A14E15" alt="Laptops">
+            </div>
+            <span>Noutbuklar</span>
+        </a>
+
+        <!-- Category Col (Gaming) -->
+        <a href="{% url 'product_list' %}?category=gaming" class="mega-visual-item">
+            <div class="mega-img-box">
+                <img src="https://dlcdnwebimgs.asus.com/gain/CD8E933A-10C0-4E13-91D3-AB4A248A19A1/w240" alt="Gaming">
+            </div>
+            <span>Gaming</span>
+        </a>
+
+        <!-- Category Col (Monitors) -->
+        <a href="{% url 'product_list' %}?category=monitors" class="mega-visual-item">
+            <div class="mega-img-box">
+                <img src="https://dlcdnwebimgs.asus.com/gain/B5C8E97A-F78F-4D2A-B981-678BD1A14E15" alt="Monitors">
+            </div>
+            <span>Monitorlar</span>
+        </a>
+
+        <!-- Category Col (Components) -->
+        <a href="{% url 'product_list' %}?category=components" class="mega-visual-item">
+            <div class="mega-img-box">
+                <img src="https://dlcdnwebimgs.asus.com/gain/C5C8E97A-F78F-4D2A-B981-678BD1A14E15" alt="Components">
+            </div>
+            <span>Komponentlar</span>
+        </a>
+
+        <div class="mega-divider-v"></div>
+
+        <!-- Right Side: Sub-links -->
+        <div class="mega-sub-links">
+            <div class="sub-col">
+                <h5>BO'LIMLAR</h5>
+                <a href="{% url 'product_list' %}?category=rog">ROG - Republic of Gamers</a>
+                <a href="{% url 'product_list' %}?category=zenbook">Zenbook Seriyasi</a>
+                <a href="{% url 'product_list' %}?category=vivobook">Vivobook</a>
+                <a href="{% url 'product_list' %}?category=tuf">TUF Gaming</a>
+            </div>
+        </div>
+
+    </div>
+</div>
+<div class="mega-menu-overlay" id="mega-overlay" onclick="closeMegaMenu()"></div>
+
+<!-- Messages -->
+{% if messages %}
+<div style="position:fixed;top:90px;right:20px;z-index:999999;display:flex;flex-direction:column;gap:10px;pointer-events:none;">
+    {% for message in messages %}
+    <div style="
+        background:var(--text-primary);color:white;
+        padding:12px 22px;border-radius:10px;
+        font-size:14px;font-weight:500;
+        box-shadow:var(--shadow-lg);
+        pointer-events:auto;
+        display:flex;align-items:center;gap:10px;
+        animation:fadeIn 0.3s ease forwards;
+        cursor:pointer;
+    " onclick="this.style.opacity='0';setTimeout(()=>this.remove(),300)">
+        {% if message.tags == 'success' %}
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4caf50" stroke-width="2.5" fill="none"><polyline points="20 6 9 17 4 12"/></svg>
+        {% elif message.tags == 'error' %}
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="#e53935" stroke-width="2.5" fill="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        {% else %}
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="#2196f3" stroke-width="2.5" fill="none"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12.01" y2="8"/><line x1="12" y1="12" x2="12" y2="16"/></svg>
+        {% endif %}
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+<style>
+@keyframes fadeIn {
+    from { opacity:0; transform:translateX(20px); }
+    to { opacity:1; transform:none; }
+}
+</style>
+{% endif %}
+
+<!-- Page Content -->
+<main class="page-wrapper page-content-wrap">
+    {% block content %}
+    {% endblock content %}
+</main>
+
+{% block floating_cart %}{% endblock %}
+
+<!-- Search Overlay -->
+<div id="search-overlay" onclick="closeSearchIfOutside(event)">
+    <div class="search-box">
+        <form action="{% url 'product_list' %}" method="GET" id="search-form">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input id="search-input" name="q" type="text"
+                   placeholder="Mahsulot qidiring..."
+                   autocomplete="off">
+            <button type="button" class="search-esc" onclick="closeSearch()">Esc</button>
+        </form>
+        <div class="search-hint">Mahsulot nomi yoki tavsifi bo'yicha qidirish</div>
+    </div>
+</div>
+
+<!-- Footer -->
+<!-- ASUS FOOTER -->
+<footer class="asus-footer" style="background-color: #111111; color: #ffffff; padding: 60px 20px;">
+    <div class="footer-inner" style="max-width: 1200px; margin: 0 auto;">
+        <div class="footer-grid" style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 40px; margin-bottom: 60px;">
+            <div class="footer-col" style="flex: 1; min-width: 200px;">
+                <h4 style="color: #ffffff; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 20px;">Biz haqimizda</h4>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <a href="#" style="color: #999999; font-size: 14px; text-decoration: none;">Brend haqida</a>
+                    <a href="#" style="color: #999999; font-size: 14px; text-decoration: none;">Yangiliklar</a>
+                </div>
+            </div>
+            <div class="footer-col" style="flex: 1; min-width: 200px;">
+                <h4 style="color: #ffffff; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 20px;">Yordam</h4>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <a href="{% url 'help_page' %}" style="color: #999999; font-size: 14px; text-decoration: none;">Qo'llab-quvvatlash</a>
+                    <a href="{% url 'help_page' %}#warranty" style="color: #999999; font-size: 14px; text-decoration: none;">Kafolat va qaytarish</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom-nav" style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #333333; padding-top: 30px; font-size: 13px; color: #999999;">
+            <div>
+                <a href="#" style="color: #999999; margin-right: 15px; text-decoration: none;">Maxfiylik siyosati</a>
+                <a href="#" style="color: #999999; margin-right: 15px; text-decoration: none;">Foydalanish shartlari</a>
+                <span>© {{ site_settings.site_name|default:'NEXUS' }}. Barcha huquqlar himoyalangan.</span>
+            </div>
+            <div style="color: #ffffff;">O'zbekiston</div>
+        </div>
+    </div>
+</footer>
+
+<!-- Help FAB -->
+<a href="{% url 'help_page' %}" id="help-fab" title="Yordam"
+   style="position:fixed;bottom:28px;right:20px;z-index:49000;
+          width:44px;height:44px;border-radius:50%;
+          background:var(--text-primary);color:white;border:none;
+          display:flex;align-items:center;justify-content:center;
+          cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.2);
+          font-size:20px;font-weight:700;text-decoration:none;
+          transition:all .25s ease;"
+   onmouseover="this.style.transform='scale(1.1)';this.style.boxShadow='0 6px 24px rgba(0,0,0,0.3)'"
+   onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 4px 16px rgba(0,0,0,0.2)'">?</a>
+
+{% block help_content %}{% endblock %}
+
+<!-- ══════════════════════════════════════════════
+     GLOBAL SCRIPTS
+══════════════════════════════════════════════ -->
+<script>
+/* ── Announce Bar Rotation ─── */
+var annIdx = 0, annTotal = 3;
+function showAnn(i) {
+    for(var j=0; j<annTotal; j++) {
+        var el = document.getElementById('ann-'+j);
+        if(el) el.classList.toggle('active', j===i);
+    }
+}
+function nextAnn() { annIdx=(annIdx+1)%annTotal; showAnn(annIdx); }
+function prevAnn() { annIdx=(annIdx-1+annTotal)%annTotal; showAnn(annIdx); }
+setInterval(nextAnn, 5000);
+
+/* ── Mega Menu ─── */
+var megaOpen = false;
+function toggleMegaMenu() {
+    megaOpen = !megaOpen;
+    var menu = document.getElementById('mega-menu');
+    var overlay = document.getElementById('mega-overlay');
+    var hamburger = document.getElementById('nav-hamburger');
+    if (megaOpen) {
+        menu.classList.add('open');
+        overlay.classList.add('open');
+        hamburger.style.opacity = '0.6';
+    } else {
+        closeMegaMenu();
+    }
+}
+function closeMegaMenu() {
+    megaOpen = false;
+    document.getElementById('mega-menu').classList.remove('open');
+    document.getElementById('mega-overlay').classList.remove('open');
+    document.getElementById('nav-hamburger').style.opacity = '1';
+}
+document.addEventListener('keydown', function(e) {
+    if(e.key==='Escape') { closeMegaMenu(); closeSearch(); }
+});
+
+/* ── Scroll-aware Navbar ─── */
+(function() {
+    var nav = document.getElementById('main-nav');
+    if(!nav) return;
+    function updateNav() {
+        nav.classList.toggle('scrolled', window.scrollY > 4);
+    }
+    window.addEventListener('scroll', updateNav, {passive:true});
+    updateNav();
+})();
+
+/* ── Search Overlay ─── */
+function openSearch() {
+    var o = document.getElementById('search-overlay');
+    o.style.display = 'flex';
+    setTimeout(function(){ o.style.opacity = '1'; }, 10);
+    setTimeout(function(){ document.getElementById('search-input').focus(); }, 80);
+    document.body.style.overflow = 'hidden';
+}
+function closeSearch() {
+    var o = document.getElementById('search-overlay');
+    o.style.opacity = '0';
+    setTimeout(function(){ o.style.display = 'none'; }, 200);
+    document.body.style.overflow = '';
+}
+function closeSearchIfOutside(e) {
+    if(e.target === document.getElementById('search-overlay')) closeSearch();
+}
+document.addEventListener('keydown', function(e) {
+    if(e.key==='Escape') closeSearch();
+    if((e.metaKey||e.ctrlKey)&&e.key==='k'){ e.preventDefault(); openSearch(); }
+});
+
+/* ── Toast ─── */
+function showCartToast(message, isSuccess) {
+    var t = document.getElementById('cart-toast');
+    if(t) t.remove();
+    t = document.createElement('div');
+    t.id = 'cart-toast';
+    t.className = 'cart-toast-msg';
+    var icon = isSuccess
+        ? '<svg viewBox="0 0 24 24" width="14" height="14" stroke="#4caf50" stroke-width="2.5" fill="none"><polyline points="20 6 9 17 4 12"/></svg>'
+        : '<svg viewBox="0 0 24 24" width="14" height="14" stroke="#e53935" stroke-width="2.5" fill="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+    t.innerHTML = icon + message;
+    document.body.appendChild(t);
+    requestAnimationFrame(function(){
+        t.style.opacity='1';
+        t.style.transform='translateX(-50%) translateY(0)';
+    });
+    setTimeout(function(){
+        t.style.opacity='0';
+        t.style.transform='translateX(-50%) translateY(-10px)';
+        setTimeout(function(){ t.remove(); },300);
+    },2500);
+}
+
+/* ── Update Cart Badge ─── */
+function updateCartBadge(count) {
+    var cartLink = document.querySelector('a[aria-label="Savatcha"]');
+    if(!cartLink) return;
+    var badge = cartLink.querySelector('.cart-badge-pill');
+    if(count > 0) {
+        if(!badge) {
+            badge = document.createElement('span');
+            badge.className = 'cart-badge-pill';
+            cartLink.appendChild(badge);
+        }
+        badge.textContent = count;
+        badge.style.transform='scale(1.4)';
+        setTimeout(function(){ badge.style.transform='scale(1)'; },250);
+    } else {
+        if(badge) badge.remove();
+    }
+}
+
+/* ── AJAX Cart ─── */
+document.addEventListener('click', function(e) {
+    var btn = e.target.closest('button[data-ajax-cart], .ajax-cart-btn');
+    if(!btn) return;
+    var form = btn.closest('form');
+    if(!form) return;
+    e.preventDefault();
+    var originalContent = btn.innerHTML;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none" style="animation:spin 0.8s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>';
+    btn.disabled = true;
+    fetch(form.action, {
+        method:'POST',
+        headers:{'X-Requested-With':'XMLHttpRequest'},
+        body:new FormData(form)
+    }).then(function(r){ return r.json(); }).then(function(data){
+        if(data.success){
+            updateCartBadge(data.cart_count);
+            showCartToast(data.message||"✓ Savatchaga qo'shildi!", true);
+            btn.innerHTML='<svg viewBox="0 0 24 24" width="13" height="13" stroke="#4caf50" stroke-width="2.5" fill="none"><polyline points="20 6 9 17 4 12"/></svg> Qo\'shildi';
+            setTimeout(function(){ btn.innerHTML=originalContent; btn.disabled=false; },1200);
+        }
+    }).catch(function(){
+        btn.innerHTML=originalContent; btn.disabled=false;
+        showCartToast("Xatolik yuz berdi", false);
+    });
+});
+
+/* ── Auto hide messages ─── */
+setTimeout(function(){
+    document.querySelectorAll('[onclick*="style.opacity"]').forEach(function(el,i){
+        setTimeout(function(){
+            el.style.opacity='0';
+            el.style.transform='translateX(20px)';
+            setTimeout(function(){ el.remove(); },300);
+        }, 4000+i*150);
+    });
+},4000);
+
+/* ── Smooth page transitions ─── */
+(function(){
+    var leaving=false;
+    function fadeIn(){ document.body.style.transition='opacity 0.15s'; document.body.style.opacity='1'; }
+    function fadeOut(cb){ if(leaving)return; leaving=true; document.body.style.transition='opacity 0.12s'; document.body.style.opacity='0'; setTimeout(cb,125); }
+    window.addEventListener('pageshow',function(e){ leaving=false; fadeIn(); });
+    document.addEventListener('DOMContentLoaded', fadeIn);
+    setTimeout(fadeIn, 500);
+    document.addEventListener('click',function(e){
+        var link=e.target.closest('a[href]');
+        if(!link) return;
+        if(link.closest('[data-ajax-zone]')) return;
+        var href=link.getAttribute('href');
+        if(!href||href==='#'||href.startsWith('javascript')||href.startsWith('mailto')||href.startsWith('tel')||link.target==='_blank'||link.download||e.ctrlKey||e.metaKey||e.shiftKey) return;
+        if(link.origin&&link.origin!==location.origin) return;
+        if(link.pathname===location.pathname&&link.search===location.search&&link.hash) return;
+        e.preventDefault();
+        var dest=link.href;
+        fadeOut(function(){ location.href=dest; });
+    },true);
+})();
+</script>
+<style>
+@keyframes spin { to { transform:rotate(360deg); } }
+</style>
+
+</body>
+</html>
